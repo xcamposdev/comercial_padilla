@@ -4,9 +4,10 @@
     'version': '0.0',
     'summary': """Permite asociar un empaquetado a un paquete con su ubicación.""",
     'description': """""",
-    'depends': ['product',"stock"],
+    'depends': ['product',"stock","stock_barcode"],
     'data': [
         'views/product_packaging.xml',
+        'views/assets.xml',
     ],
     'author': 'Develoop Software',
     'images': ['static/description/icon.png'],
