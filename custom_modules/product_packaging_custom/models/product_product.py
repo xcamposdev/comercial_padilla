@@ -23,6 +23,13 @@ class Product_Custom(models.Model):
         to_read = []
         products_by_id = {product['id']: product for product in products}
         for packaging in packagings:
+            #####################################
+            if packaging.get('x_package', False) and packaging.get('x_location', False):
+                location = self.env['stock.location'].search([('id','=', packaging['x_location'][0])])
+                if location:
+                    packaging['x_location_usage'] = location.usage
+            #####################################
+
             if products_by_id.get(packaging['product_id']):
                 product = products_by_id[packaging['product_id']]
                 to_add.append(dict(product, **{'qty': packaging['qty']}))

@@ -2,10 +2,13 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
     "use strict";
     
     var StockBarcodeClientAction = require("stock_barcode.ClientAction");
-    
+    var core = require('web.core');
+    var _t = core._t;
+
     StockBarcodeClientAction.include({
         _step_product: function (barcode, linesActions) {
             console.log("PRODUCTOS NUEVO");//andres
+            barcode = "3057067316251";
             var self = this;
             this.currentStep = 'product';
             var errorMessage;
@@ -37,7 +40,8 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                     }
                 } else {
                     //--------------------------------------------------------------
-                    if (res.lineDescription != null && product.x_location != null && res.lineDescription.location_dest_id.id != product.x_location[0])
+                    if (res.lineDescription != null && product.x_location != null && product.x_location_usage != null &&
+                        product.x_location_usage == 'internal' && res.lineDescription.location_dest_id.id != product.x_location[0])
                     {
                         errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + res.lineDescription.location_dest_id.display_name;
                         return Promise.reject(errorMessage);
