@@ -5,6 +5,8 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
     
     PickingClientAction.include({
         _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id) {
+            console.log("NUEVA LINEA");
+            console.log(this);
             var virtualId = this._getNewVirtualId();
             var currentPage = this.pages[this.currentPageIndex];
             var newLine = {
@@ -25,11 +27,11 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
                     'display_name': currentPage.location_name,
                 },
                 'location_dest_id': {
-                    'id': (product.x_location != undefined && product.x_location_usage != undefined && product.x_location_usage == 'internal') ? product.x_location[0] : currentPage.location_dest_id,
-                    'display_name': (product.x_location != undefined && product.x_location_usage != undefined && product.x_location_usage == 'internal') ? product.x_location[1] : currentPage.location_dest_name,
+                    'id': (product.x_location != undefined && this.currentState.picking_type_code == "internal") ? product.x_location[0] : currentPage.location_dest_id,
+                    'display_name': (product.x_location != undefined && this.currentState.picking_type_code == "internal") ? product.x_location[1] : currentPage.location_dest_name,
                 },
                 'package_id': package_id,
-                'result_package_id':  (product.x_package != undefined && product.x_location_usage != undefined && product.x_location_usage == 'internal') ? [product.x_package[0], product.x_package[1]] : result_package_id,
+                'result_package_id':  (product.x_package != undefined && this.currentState.picking_type_code == "internal") ? [product.x_package[0], product.x_package[1]] : result_package_id,
                 'state': 'assigned',
                 'reference': this.name,
                 'virtual_id': virtualId,
