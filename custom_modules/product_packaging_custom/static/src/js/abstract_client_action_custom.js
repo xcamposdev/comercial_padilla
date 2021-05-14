@@ -7,6 +7,7 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
 
     StockBarcodeClientAction.include({
         _step_product: function (barcode, linesActions) {
+            barcode = "3057067316251";
             var self = this;
             this.currentStep = 'product';
             var errorMessage;
@@ -34,11 +35,31 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                             return Promise.resolve({linesActions: linesActions});
                         });
                     } else {
+                        console.log("test 2");
+                        console.log(this.linesWidget.addProduct);
+                        console.log(res.lineDescription);
+                        console.log(this.actionParams.model);
+                        
+                        if (product.x_location != undefined && this.currentState.picking_type_code == "internal")
+                        {
+                            res.lineDescription['location_dest_id'] = {
+                                'id': product.x_location[0],
+                                'display_name': product.x_location[1],
+                            };
+                            res.lineDescription['result_package_id'] = [product.x_package[0], product.x_package[1]];
+
+                            if (res.lineDescription.location_dest_id.id != product.x_location[0])
+                            {
+                                errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + res.lineDescription.location_dest_id.display_name;
+                                return Promise.reject(errorMessage);
+                            }
+                        }
+
                         linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
                     }
                 } else {
                     //--------------------------------------------------------------
-                    if (res.lineDescription != null && product.x_location != null && product.x_location_usage != null &&
+                    if (res.lineDescription != null && product.x_location != null &&
                         this.currentState.picking_type_code == "internal" && res.lineDescription.location_dest_id.id != product.x_location[0])
                     {
                         errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + res.lineDescription.location_dest_id.display_name;

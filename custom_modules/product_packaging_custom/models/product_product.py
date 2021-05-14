@@ -16,7 +16,7 @@ class Product_Custom(models.Model):
         )
         packagings = self.env['product.packaging'].search_read(
             [('barcode', '!=', None), ('product_id', '!=', None)],
-            ['barcode', 'product_id', 'qty','x_package']
+            ['barcode', 'product_id', 'qty','x_package','x_location']
         )
         # for each packaging, grab the corresponding product data
         to_add = []

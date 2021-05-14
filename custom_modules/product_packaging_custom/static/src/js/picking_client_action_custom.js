@@ -7,6 +7,9 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
         _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id) {
             var virtualId = this._getNewVirtualId();
             var currentPage = this.pages[this.currentPageIndex];
+            console.log(this.currentState.picking_type_code);
+            console.log(this);
+            console.log(currentPage);
             var newLine = {
                 'picking_id': this.currentState.id,
                 'product_id': {
