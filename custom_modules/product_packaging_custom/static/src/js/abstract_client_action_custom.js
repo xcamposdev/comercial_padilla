@@ -7,7 +7,6 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
 
     StockBarcodeClientAction.include({
         _step_product: function (barcode, linesActions) {
-            barcode = "3057067316251";
             var self = this;
             this.currentStep = 'product';
             var errorMessage;
@@ -35,11 +34,6 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                             return Promise.resolve({linesActions: linesActions});
                         });
                     } else {
-                        console.log("test 2");
-                        console.log(this.linesWidget.addProduct);
-                        console.log(res.lineDescription);
-                        console.log(this.actionParams.model);
-                        
                         if (product.x_location != undefined && this.currentState.picking_type_code == "internal")
                         {
                             res.lineDescription['location_dest_id'] = {
