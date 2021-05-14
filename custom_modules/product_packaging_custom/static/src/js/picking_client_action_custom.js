@@ -5,8 +5,6 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
     
     PickingClientAction.include({
         _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id) {
-            console.log("NUEVA LINEA");
-            console.log(this);
             var virtualId = this._getNewVirtualId();
             var currentPage = this.pages[this.currentPageIndex];
             var newLine = {
