@@ -7,8 +7,6 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
 
     StockBarcodeClientAction.include({
         _step_product: function (barcode, linesActions) {
-            console.log("PRODUCTOS NUEVO");//andres
-            barcode = "3057067316251";
             var self = this;
             this.currentStep = 'product';
             var errorMessage;
