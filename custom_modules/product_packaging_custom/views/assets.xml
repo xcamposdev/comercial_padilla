@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE xml>
+<odoo>
+
+    <template id="product_packaging_custom" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/product_packaging_custom/static/src/js/abstract_client_action_custom.js"></script>
+            <script type="text/javascript" src="/product_packaging_custom/static/src/js/picking_client_action_custom.js"></script>
+        </xpath>
+    </template>
+
+</odoo>
