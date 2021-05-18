@@ -7,7 +7,7 @@
     'depends': ['product',"stock","stock_barcode"],
     'data': [
         'views/product_packaging.xml',
-        #'views/assets.xml',
+        'views/assets.xml',
     ],
     'author': 'Develoop Software',
     'images': ['static/description/icon.png'],

@@ -34,29 +34,43 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                             return Promise.resolve({linesActions: linesActions});
                         });
                     } else {
-                        if (product.x_location != undefined && this.currentState.picking_type_code == "internal")
+                        if (this.currentState.location_dest_id != undefined && product.x_location != undefined && this.currentState.picking_type_code == "internal" && this.currentState.location_dest_id.id != product.x_location[0])
                         {
-                            res.lineDescription['location_dest_id'] = {
-                                'id': product.x_location[0],
-                                'display_name': product.x_location[1],
-                            };
-                            res.lineDescription['result_package_id'] = [product.x_package[0], product.x_package[1]];
-
-                            if (res.lineDescription.location_dest_id.id != product.x_location[0])
+                            if (this.scannedLines != "")
                             {
-                                errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + res.lineDescription.location_dest_id.display_name;
-                                return Promise.reject(errorMessage);
+                                errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + this.currentState.location_dest_id.display_name;
+                                return Promise.reject(errorMessage);    
+                            }
+                            else
+                            {
+                                // x_location_barcode
+                                //this.currentState.location_dest_id.id = product.x_location[0];
+                                //this.currentState.location_dest_id.display_name = product.x_location[1];
+                                res.lineDescription['location_dest_id'] = {
+                                    'id': product.x_location[0],
+                                    'display_name': product.x_location[1],
+                                };
+                                res.lineDescription['result_package_id'] = [product.x_package[0], product.x_package[1]];
+                                linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
+                                if (product.x_location_barcode)
+                                {
+                                    _step_source(x_location_barcode, linesActions);
+                                }
                             }
                         }
+                        else
+                        {
+                            linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
+                        }
+                        //--------------------------------------------------------------
 
-                        linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
+                        //linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
                     }
                 } else {
                     //--------------------------------------------------------------
-                    if (res.lineDescription != null && product.x_location != null &&
-                        this.currentState.picking_type_code == "internal" && res.lineDescription.location_dest_id.id != product.x_location[0])
+                    if (this.currentState.location_dest_id != undefined && product.x_location != null && this.currentState.picking_type_code == "internal" && this.currentState.location_dest_id.id != product.x_location[0])
                     {
-                        errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + res.lineDescription.location_dest_id.display_name;
+                        errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + this.currentState.location_dest_id.display_name;
                         return Promise.reject(errorMessage);
                     }
                     //--------------------------------------------------------------
