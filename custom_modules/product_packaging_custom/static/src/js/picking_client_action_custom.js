@@ -36,6 +36,20 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
             };
             return newLine;
         },
+        // _onValidate: function (ev) {
+        //     ev.stopPropagation();
+        //     console.log(this);
+        //     if (this.set_location_dest_barcode != undefined)
+        //     {
+        //         console.log("this.set_location_dest_barcode");
+        //         console.log(this.set_location_dest_barcode);
+        //         this._onBarcodeScanned(this.set_location_dest_barcode);
+        //     }
+        //     else
+        //     {
+        //         this._validate();
+        //     }
+        // },
     });
     return PickingClientAction;
 });
