@@ -8,17 +8,19 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
     StockBarcodeClientAction.include({
         _step_product: function (barcode, linesActions) {
             // if (barcode == "123")
-            //     barcode = "3057067316251";
-            barcode = "3057067316251";
+            //barcode = "3057067316251";
+            //barcode = "3057067316251";
             // if (barcode != "845973020071")
             // {
             //     console.log("es vacio");
             //     barcode = "3057067316251";
             // }
-            // if (this.scannedLines == "")
+            // if (this.scannedLines == ""){
             //     barcode = "3057067316251";
+            // }
             // else
-            //     barcode = "845973020071";
+            //     barcode = "3057067316250";
+            // console.log(barcode)
             var self = this;
             this.currentStep = 'product';
             var errorMessage;

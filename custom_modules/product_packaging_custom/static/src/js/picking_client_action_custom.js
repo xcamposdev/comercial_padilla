@@ -33,6 +33,9 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
                 'state': 'assigned',
                 'reference': this.name,
                 'virtual_id': virtualId,
+
+                'x_product_packaging_id': product.packaging_id,
+                'x_product_packaging_qty': qty_done,
             };
             return newLine;
         },
@@ -50,6 +53,64 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
         //         this._validate();
         //     }
         // },
+
+        _applyChanges: function (changes) {
+            var formattedCommands = [];
+            var cmd = [];
+            for (var i in changes) {
+                var line = changes[i];
+                if (line.id) {
+                    // Line needs to be updated
+                    cmd = [1, line.id, {
+                        'qty_done' : line.qty_done,
+                        'location_id': line.location_id.id,
+                        'location_dest_id': line.location_dest_id.id,
+                        'lot_id': line.lot_id && line.lot_id[0],
+                        'lot_name': line.lot_name,
+                        'package_id': line.package_id ? line.package_id[0] : false,
+                        'result_package_id': line.result_package_id ? line.result_package_id[0] : false,
+                        'x_product_packaging_id': line.x_product_packaging_id ? line.x_product_packaging_id : false,
+                        'x_product_packaging_qty': line.x_product_packaging_qty ? line.x_product_packaging_qty : false,
+                    }];
+                    formattedCommands.push(cmd);
+                } else {
+                    // Line needs to be created
+                    cmd = [0, 0, {
+                        'picking_id': line.picking_id,
+                        'product_id':  line.product_id.id,
+                        'product_uom_id': line.product_uom_id[0],
+                        'qty_done': line.qty_done,
+                        'location_id': line.location_id.id,
+                        'location_dest_id': line.location_dest_id.id,
+                        'lot_name': line.lot_name,
+                        'lot_id': line.lot_id && line.lot_id[0],
+                        'state': 'assigned',
+                        'package_id': line.package_id ? line.package_id[0] : false,
+                        'result_package_id': line.result_package_id ? line.result_package_id[0] : false,
+                        'x_product_packaging_id': line.x_product_packaging_id ? line.x_product_packaging_id : false,
+                        'x_product_packaging_qty': line.x_product_packaging_qty ? line.x_product_packaging_qty : false,
+                        'dummy_id': line.virtual_id,
+                    }];
+                    formattedCommands.push(cmd);
+                }
+            }
+            if (formattedCommands.length > 0){
+                var params = {
+                    'mode': 'write',
+                    'model_name': this.actionParams.model,
+                    'record_id': this.currentState.id,
+                    'write_vals': formattedCommands,
+                    'write_field': 'move_line_ids',
+                };
+                return this._rpc({
+                    'route': '/stock_barcode/get_set_barcode_view_state',
+                    'params': params,
+                });
+            } else {
+                return Promise.reject();
+            }
+        },
+
     });
     return PickingClientAction;
 });
