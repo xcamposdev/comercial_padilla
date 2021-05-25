@@ -75,21 +75,3 @@ class StockMove_custom(models.Model):
         if picking and not cancel_backorder:
             picking._create_backorder()
         return moves_todo
-
-class StockMoveLine_custom(models.Model):
-    
-    _inherit = "stock.move.line"
-
-    x_product_packaging_id = fields.Many2one('product.packaging', string='Empaquetado del Producto')
-    x_product_packaging_qty = fields.Float(string='Cantidad')
-    
-
-    def _action_done(self):
-        super(StockMoveLine_custom, self)._action_done()
-        Quant = self.env['stock.quant']
-        for ml in self:
-            quantity = ml.product_uom_id._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
-            available_qty, in_date = Quant._update_available_quantity_custom(ml.product_id, ml.location_id, -quantity, lot_id=ml.lot_id, package_id=ml.package_id, \
-                owner_id=ml.owner_id, packaging_id=ml.x_product_packaging_id, packaging_qty=ml.x_product_packaging_qty)
-            Quant._update_available_quantity_custom(ml.product_id, ml.location_dest_id, quantity, lot_id=ml.lot_id, package_id=ml.result_package_id, \
-                owner_id=ml.owner_id, in_date=in_date, packaging_id=ml.x_product_packaging_id, packaging_qty=ml.x_product_packaging_qty)
