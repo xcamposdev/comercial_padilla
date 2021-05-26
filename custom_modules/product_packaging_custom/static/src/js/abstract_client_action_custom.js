@@ -19,8 +19,8 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
             //     barcode = "3057067316251";
             // }
             // else
-            //     barcode = "3057067316250";
-            // console.log(barcode)
+            //     barcode = "3057067316255";
+            // console.log(barcode);
             var self = this;
             this.currentStep = 'product';
             var errorMessage;
@@ -52,6 +52,16 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                         {
                             if (self.scannedLines != "")
                             {
+                                var index = this._getLines(this.currentState).indexOf(res.lineDescription);
+                                if (index !== -1) {
+                                    this._getLines(this.currentState).splice(index, 1);
+                                }
+                                var index = this.pages[this.currentPageIndex].lines.indexOf(res.lineDescription);
+                                if (index !== -1) {
+                                    this.pages[this.currentPageIndex].lines.splice(index, 1);
+                                }
+                                //this._getLines(this.currentState).push(line);
+                                //this.pages[this.currentPageIndex].lines.push(line);
                                 errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + self.currentState.location_dest_id.display_name;
                                 return Promise.reject(errorMessage);    
                             }
@@ -92,7 +102,7 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                     }
                 } else {
                     //--------------------------------------------------------------
-                    if (self.currentState.location_dest_id != undefined && product.x_location != null && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
+                    if (self.currentState.location_dest_id != undefined && product.x_location != undefined && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
                     {
                         errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + self.currentState.location_dest_id.display_name;
                         return Promise.reject(errorMessage);
