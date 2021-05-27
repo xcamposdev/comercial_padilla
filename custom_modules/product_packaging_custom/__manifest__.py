@@ -7,7 +7,6 @@
     'depends': ['product',"stock","stock_barcode"],
     'data': [
         'views/product_packaging.xml',
-        'views/product_template.xml',
         'views/stock_quant.xml',
         'views/assets.xml',
     ],
