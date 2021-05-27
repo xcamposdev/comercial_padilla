@@ -4,7 +4,7 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
     var PickingClientAction = require("stock_barcode.picking_client_action");
     
     PickingClientAction.include({
-        _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id) {
+        _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id, owner_id) {
             var virtualId = this._getNewVirtualId();
             var currentPage = this.pages[this.currentPageIndex];
             var newLine = {
@@ -30,6 +30,7 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
                 },
                 'package_id': package_id,
                 'result_package_id':  (product.x_package != undefined && this.currentState.picking_type_code == "internal") ? [product.x_package[0], product.x_package[1]] : result_package_id,
+                'owner_id': owner_id,
                 'state': 'assigned',
                 'reference': this.name,
                 'virtual_id': virtualId,
