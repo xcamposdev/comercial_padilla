@@ -39,6 +39,8 @@ class material_delivery_sale_order(models.Model):
 
                         if packing_qty != 0:
                             #raise UserError('Mensaje de error')
+                            if packaging[0]['x_location'] ==False:
+                                packaging[0]['x_location'] = [int(location_default)]
                             self.create_aditional_material_delivery(line, operation_type_cornella, packaging[0]['x_location'][0], packing_qty, warehouse_cornella)
                         packaging.pop(0)
                     else:

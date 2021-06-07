@@ -12,8 +12,9 @@
                         <field name="x_list_price_sale" nolabel="1">
                             <tree>
                                 <field name="pricelist_id" string="Tarifa" />
-                                <field name="price" string="Precio"/>
-                                <field name="x_price_cost_difference" string="Margen"/>
+                                <field name="x_price" />
+                                <field name="x_price_cost_difference" />
+                                <field name="x_percent_margin_sale"/>
                             </tree>
                         </field>
                     </group>
