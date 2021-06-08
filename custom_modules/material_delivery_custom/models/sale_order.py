@@ -23,7 +23,7 @@ class material_delivery_sale_order(models.Model):
         operation_type_cornella = int(self.env['ir.config_parameter'].sudo().get_param('x_md_operation_type_cornella'))
         warehouse_cornella = warehouse_cornella.split()
         warehouse_cornella = list(map(int, warehouse_cornella))
-        if self.state == 'sale' and self.warehouse_id.id in warehouse_cornella:
+        if (self.state == 'sale' or self.state == 'done') and self.warehouse_id.id in warehouse_cornella:
             for line in self.order_line:
                 
                 product_qty = line.product_uom_qty
