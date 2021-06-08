@@ -5,13 +5,14 @@
     'author': 'Develoop Software S.A.',
     'category': 'Padilla',
     'website': 'https://www.develoop.net/',
-    'depends': ['base', 'sale'],
+    'depends': ['base', 'sale','stock'],
     'summary': 'Modifica la funcionalidad de generacion de stock a partir de una venta',
     'description': """
         Modifica la funcionalidad de generacion de stock a partir de una venta
         """,
     'data': [
-        'views/parameters.xml'
+        'views/parameters.xml',
+        'views/stock_move.xml'
     ],
     'qweb': [
     ],

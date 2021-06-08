@@ -27,7 +27,7 @@ class material_delivery_sale_order(models.Model):
             for line in self.order_line:
                 
                 product_qty = line.product_uom_qty
-                packaging = self.env['product.packaging'].search_read([('product_id','=',line.product_id.id)], fields=['id', 'qty','x_location'],  order='qty desc')
+                packaging = self.env['product.packaging'].search_read([('product_id','=',line.product_id.id)], fields=['id', 'qty','x_location','x_package'],  order='qty desc')
                 
                 while product_qty > 0:
                     if packaging and len(packaging):
@@ -41,16 +41,15 @@ class material_delivery_sale_order(models.Model):
                             #raise UserError('Mensaje de error')
                             if packaging[0]['x_location'] ==False:
                                 packaging[0]['x_location'] = [int(location_default)]
-                            self.create_aditional_material_delivery(line, operation_type_cornella, packaging[0]['x_location'][0], packing_qty, warehouse_cornella)
+                            self.create_aditional_material_delivery(line, operation_type_cornella, packaging[0]['x_location'][0], packing_qty, packaging[0]['x_package'][0])
                         packaging.pop(0)
                     else:
-                        self.create_aditional_material_delivery(line, operation_type_cornella, int(location_default), product_qty, warehouse_cornella)
+                        self.create_aditional_material_delivery(line, operation_type_cornella, int(location_default), product_qty)
                         break
         #----------------------------------------------------------------
         return sale
-        #que sucede si no tiene localizacion el paquete
 
-    def create_aditional_material_delivery(self, line, operation_type_cornella, locationId, qty, warehouse_cornella):
+    def create_aditional_material_delivery(self, line, operation_type_cornella, locationId, qty, packaging_id=False):
         move_search = self.env['stock.move'].search([
             ('product_id','=',line.move_ids[0].product_id.id),
             ('product_qty','=',line.move_ids[0].product_qty),
@@ -83,6 +82,7 @@ class material_delivery_sale_order(models.Model):
             'priority':move_search.priority,
             'delay_alert':move_search.delay_alert,
             'sale_line_id':False,
+            'x_packaging': packaging_id,
         }
         move = self.env['stock.move'].sudo().create(moves_values)
         move._action_confirm()
