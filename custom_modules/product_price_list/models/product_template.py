@@ -18,15 +18,15 @@ class Product_Template_Price_Custom(models.Model):
                     data.x_price = data.price
                     if data.compute_price == 'fixed':
                         data.x_price_cost_difference = data.fixed_price - record.standard_price
-                        data.x_percent_margin_sale = ((data.fixed_price - record.standard_price) / data.fixed_price) * 100
+                        data.x_percent_margin_sale = ((data.fixed_price - record.standard_price) / (data.fixed_price if data.fixed_price != 0 else 1)) * 100
                     elif data.compute_price == 'percentage':
                         price_sale = (record.list_price - (data.percent_price * record.list_price / 100))
                         data.x_price_cost_difference = price_sale - record.standard_price
-                        data.x_percent_margin_sale = ((price_sale - record.standard_price) / price_sale) * 100
+                        data.x_percent_margin_sale = ((price_sale - record.standard_price) / (price_sale if price_sale != 0 else 1)) * 100
                     elif data.compute_price == 'formula':
                         price_sale = (record.list_price - (data.price_discount * record.list_price / 100) + data.price_surcharge)
                         data.x_price_cost_difference = price_sale - record.standard_price
-                        data.x_percent_margin_sale = ((price_sale - record.standard_price) / price_sale) * 100
+                        data.x_percent_margin_sale = ((price_sale - record.standard_price) / (price_sale if price_sale != 0 else 1)) * 100
                 record.x_list_price_sale = product_pricelist_items
             else:
                 record.x_list_price_sale = False
