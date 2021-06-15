@@ -1,0 +1,13 @@
+<odoo>
+
+    <record model="ir.ui.view" id="res_partner_form_view_discount">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='purchase']" position="inside">
+                <field name="x_purchase_discount" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
