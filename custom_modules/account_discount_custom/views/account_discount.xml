@@ -9,6 +9,15 @@
             <xpath expr="//field[@name='amount_untaxed']" position="before">
                 <field name="x_discount_global" attrs="{'readonly': [('state', 'in', ('done','cancel'))]}" />
             </xpath>
+        
+            <xpath expr="//field[@name='price_subtotal']" position="replace">
+                <field name="x_price_subtotal_ui" string="Subtotal" groups="account.group_show_line_subtotals_tax_excluded" force_save="1"/>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[2]/field[@name='line_ids']/tree[1]/field[@name='tax_ids']" position="after">
+                <field name="x_price_subtotal_ui" invisible="1" force_save="1"/>
+            </xpath>
+            
         </field>
     </record>
 </odoo>

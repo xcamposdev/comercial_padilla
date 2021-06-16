@@ -232,6 +232,8 @@ class AccountMoveLine_discount_custom(models.Model):
     
     _inherit = 'account.move.line'
 
+    x_price_subtotal_ui = fields.Monetary(string='Subtotal', store=True, readonly=True, currency_field='always_set_currency_id')
+
     @api.model
     def _get_price_total_and_subtotal_model(self, price_unit, quantity, discount, currency, product, partner, taxes, move_type):
         ''' This method is used to compute 'price_total' & 'price_subtotal'.
@@ -257,9 +259,10 @@ class AccountMoveLine_discount_custom(models.Model):
             taxes_res = taxes._origin.compute_all(price_unit_wo_discount,
                 quantity=quantity, currency=currency, product=product, partner=partner, is_refund=move_type in ('out_refund', 'in_refund'))
             res['price_subtotal'] = taxes_res['total_excluded']
+            res['x_price_subtotal_ui'] = taxes_res['total_excluded']
             res['price_total'] = taxes_res['total_included']
         else:
-            res['price_total'] = res['price_subtotal'] = subtotal
+            res['price_total'] = res['price_subtotal'] = res['x_price_subtotal_ui'] = subtotal
 
         desc = (self.move_id.x_discount_global or 0.0)/100
         if(desc > 0):

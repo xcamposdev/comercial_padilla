@@ -10,6 +10,7 @@ class PurchaseOrderDiscount(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
+        super(PurchaseOrderDiscount, self).onchange_partner_id()
         self.x_global_discount = self.partner_id.x_purchase_discount
 
     @api.depends('order_line.price_total','x_global_discount')
@@ -38,6 +39,11 @@ class PurchaseOrderDiscount(models.Model):
 class PurchaseOrderLineDiscount(models.Model):
     
     _inherit = 'purchase.order.line'
+
+    def _prepare_account_move_line(self, move):
+        vals = super(PurchaseOrderLineDiscount, self)._prepare_account_move_line(move)
+        vals["discount"] = self.discount
+        return vals
 
     @api.onchange("product_qty", "product_uom")
     def _onchange_quantity(self):
