@@ -40,7 +40,7 @@ class material_delivery_sale_order(models.Model):
 
                         if packing_qty != 0:
                             if packaging[0]['x_location'] == False:
-                                raise UserError('El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (packaging[0]['name'], line.product_id.name))
+                                raise UserError('El empaquetado "%s" no tiene asignado una ubicaciï¿½n para el producto "%s"' % (packaging[0]['name'], line.product_id.name))
                                 #packaging[0]['x_location'] = [int(location_default)]
                             self.create_aditional_material_delivery(line, operation_type_cornella, packaging[0]['x_location'][0], packing_qty, packaging[0]['x_package'][0])
                         packaging.pop(0)
@@ -53,6 +53,15 @@ class material_delivery_sale_order(models.Model):
                         # break
         #----------------------------------------------------------------
         return sale
+        
+        # if move.product_id.qty_available:
+        #     execute_cron = True
+        # return execute_cron
+        # product_qties = lines.mapped('product_id').with_context(to_date=scheduled_date, warehouse=warehouse).read([
+        #         'qty_available',
+        #         'free_qty',
+        #         'virtual_available',
+        #     ])
 
     def create_aditional_material_delivery(self, line, operation_type_cornella, locationId, qty, packaging_id=False, execute_cron=False):
         move_search = self.env['stock.move'].search([
@@ -91,12 +100,3 @@ class material_delivery_sale_order(models.Model):
         }
         move = self.env['stock.move'].sudo().create(moves_values)
         move._action_confirm()
-
-        # if move.product_id.qty_available:
-        #     execute_cron = True
-        # return execute_cron
-        # product_qties = lines.mapped('product_id').with_context(to_date=scheduled_date, warehouse=warehouse).read([
-        #         'qty_available',
-        #         'free_qty',
-        #         'virtual_available',
-        #     ])
