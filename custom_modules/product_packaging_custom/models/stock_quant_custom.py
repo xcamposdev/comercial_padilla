@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 from odoo import fields, models, api
-from psycopg2 import OperationalError, Error
+
+_logger = logging.getLogger(__name__)
 
 class Stock_Quant_Custom(models.Model):
 
@@ -14,6 +16,9 @@ class Stock_Quant_Custom(models.Model):
         for record in self:
             if record.package_id:
                 packaging_id = self.env['product.packaging'].search([('id','=',record.package_id.id)], limit=1)
+                _logger.info(packaging_id)
+                _logger.info(packaging_id.qty)
+                _logger.info(record.inventory_quantity)
                 record.x_units_format = (packaging_id.qty or 0) / (record.inventory_quantity if record.inventory_quantity != 0 else 1)
             else:
                 record.x_units_format = 0
