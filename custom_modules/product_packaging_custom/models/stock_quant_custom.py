@@ -16,6 +16,7 @@ class Stock_Quant_Custom(models.Model):
         for record in self:
             if record.package_id:
                 packaging_id = self.env['product.packaging'].search([('id','=',record.package_id.id)], limit=1)
+                _logger.info(record.package_id.id)
                 _logger.info(packaging_id)
                 _logger.info(packaging_id.qty)
                 _logger.info(record.inventory_quantity)
