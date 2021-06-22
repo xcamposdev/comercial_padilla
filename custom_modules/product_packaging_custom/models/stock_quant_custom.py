@@ -16,6 +16,9 @@ class Stock_Quant_Custom(models.Model):
         for record in self:
             if record.package_id:
                 packaging_id = self.env['product.packaging'].search([('x_package','=',record.package_id.id)], limit=1)
-                record.x_units_format = (record.inventory_quantity or 0) / (packaging_id.qty if packaging_id.qty != 0 else 1)
+                if packaging_id and packaging_id.qty != 0:
+                    record.x_units_format = (record.inventory_quantity or 0) / (packaging_id.qty if packaging_id.qty != 0 else 1)
+                else:
+                    record.x_units_format = 0
             else:
                 record.x_units_format = 0
