@@ -19,7 +19,7 @@ class account_discount_custom(models.Model):
     def onchange_partner_id(self):
         super(account_discount_custom, self)._onchange_partner_id()
         if self._context.get('active_model', False) != 'purchase.order':
-            self.x_discount_global = self.partner_id.x_descuento_pp
+            self.x_discount_global = self.partner_id.x_purchase_discount
     
     @api.onchange('x_discount_global')
     def onchange_discount(self):
