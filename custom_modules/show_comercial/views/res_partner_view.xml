@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="x_view_partner_form" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="l10n_es_partner.view_partner_form" />
+        <field name="arch" type="xml">
+            <field name="comercial" position="attributes">
+                <attribute name="attrs">{}</attribute>
+                <attribute name="domain">[]</attribute>
+            </field>
+        </field>
+    </record>
+    <record id="x_view_partner_simple_form" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="l10n_es_partner.view_partner_simple_form" />
+        <field name="arch" type="xml">
+            <field name="comercial" position="attributes">
+                <attribute name="attrs">{}</attribute>
+                <attribute name="domain">[]</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
