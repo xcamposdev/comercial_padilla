@@ -39,10 +39,8 @@ class MaterialDeliverySaleOrder(models.Model):
                     [('product_id', '=', move_line.product_id.id)], order='qty desc')
                 move_ref = self.env['stock.move'].search([
                     ('product_id', '=', move_line.move_ids[0].product_id.id),
-                    ('product_qty', '=', move_line.move_ids[0].product_qty),
-                    ('origin', '=', move_line.move_ids[0].origin),
-                    '|', ('state', '=', 'confirmed'), ('state', '=', 'assigned')
-                ])
+                    ('origin', '=', move_line.move_ids[0].origin)
+                ], limit=1)
                 for pack in packaging_ids:
                     if not pack.x_location:
                         raise UserError('El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
@@ -94,14 +92,15 @@ class MaterialDeliverySaleOrder(models.Model):
     def _generate_extra_moves_by_location(self, available_locations, move_ref, requested_qty, stock_id):
         for squant in available_locations:
             location_id = squant.location_id.id
-            available_qty = squant.quantity
-            picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
+            available_qty = squant.quantity - squant.reserved_quantity
             if available_qty >= requested_qty:
+                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                 self._generate_move_lines(move_ref, picking_id, squant, requested_qty, location_id, stock_id)
                 picking_id.action_confirm()
                 requested_qty = 0
                 break
             else:
+                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                 self._generate_move_lines(move_ref, picking_id, squant, available_qty, location_id, stock_id)
                 picking_id.action_confirm()
                 requested_qty -= available_qty
