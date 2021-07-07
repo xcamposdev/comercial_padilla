@@ -11,8 +11,8 @@
         Modifica la funcionalidad de generacion de stock a partir de una venta
         """,
     'data': [
-        'views/parameters.xml',
-        'views/stock_move.xml'
+        'views/stock_warehouse.xml',
+        'views/stock_move.xml',
     ],
     'qweb': [
     ],
