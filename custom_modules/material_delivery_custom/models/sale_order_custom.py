@@ -47,7 +47,7 @@ class MaterialDeliverySaleOrder(models.Model):
                     stock_quantity = stock_quantity.search(
                         [('location_id', '=', pack.x_location.id), ('product_id', '=', move_line.product_id.id),
                          ('package_id', '=', pack.x_package.id),
-                         ('quantity', '>', 0)], limit=1)
+                         ('quantity', '>=', pack.qty)], limit=1)
                     location_id = stock_quantity.location_id.id
                     packs_requested = MaterialDeliverySaleOrder._get_available_per_pack(
                         requested_qty, stock_quantity.quantity - stock_quantity.reserved_quantity, pack.qty)
