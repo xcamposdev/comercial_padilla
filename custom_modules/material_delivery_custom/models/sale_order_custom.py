@@ -39,19 +39,19 @@ class MaterialDeliverySaleOrder(models.Model):
                     [('product_id', '=', move_line.product_id.id)], order='qty desc')
                 move_ref = self.env['stock.move'].search([
                     ('product_id', '=', move_line.move_ids[0].product_id.id),
-                    ('origin', '=', move_line.move_ids[0].origin)
-                ], limit=1)
+                    ('origin', '=', move_line.move_ids[0].origin)], limit=1)
                 for pack in packaging_ids:
                     if not pack.x_location:
                         raise UserError('El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
                             pack.name, move_line.product_id.name))
                     stock_quantity = stock_quantity.search(
                         [('location_id', '=', pack.x_location.id), ('product_id', '=', move_line.product_id.id),
+                         ('package_id', '=', pack.x_package.id),
                          ('quantity', '>', 0)], limit=1)
                     location_id = stock_quantity.location_id.id
                     available_qty = stock_quantity.quantity - stock_quantity.reserved_quantity
-                    available_per_pack = MaterialDeliverySaleOrder._get_available_per_pack(requested_qty, pack.qty)
-                    if available_per_pack != 0 and available_qty >= available_per_pack:
+                    available_per_pack = MaterialDeliverySaleOrder._get_available_per_pack(available_qty, pack.qty)
+                    if available_per_pack != 0 and requested_qty >= available_per_pack:
                         picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                         self._generate_move_lines(move_ref, picking_id, stock_quantity,
                                                   available_per_pack, location_id, stock_id, pack.x_package.id)
@@ -83,6 +83,8 @@ class MaterialDeliverySaleOrder(models.Model):
 
     @staticmethod
     def _get_available_per_pack(requested_qty, pack_qty):
+        if requested_qty == 0:
+            return 0
         vals = range(0, int(requested_qty))
         values = [vals[i:i + int(pack_qty)] for i in range(0, len(vals), int(pack_qty))]
         if len(values[-1]) != int(pack_qty):
@@ -93,14 +95,13 @@ class MaterialDeliverySaleOrder(models.Model):
         for squant in available_locations:
             location_id = squant.location_id.id
             available_qty = squant.quantity - squant.reserved_quantity
+            picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
             if available_qty >= requested_qty:
-                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                 self._generate_move_lines(move_ref, picking_id, squant, requested_qty, location_id, stock_id)
                 picking_id.action_confirm()
                 requested_qty = 0
                 break
             else:
-                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                 self._generate_move_lines(move_ref, picking_id, squant, available_qty, location_id, stock_id)
                 picking_id.action_confirm()
                 requested_qty -= available_qty
@@ -121,7 +122,7 @@ class MaterialDeliverySaleOrder(models.Model):
             'company_id': last_move.company_id.id,
             'partner_id': last_move.partner_id.id,
             'rule_id': False,
-            'procure_method': last_move.procure_method,
+            'procure_method': 'make_to_stock',
             'picking_type_id': picking_id.picking_type_id.id,
             'group_id': last_move.group_id.id,
             'date': last_move.date,
