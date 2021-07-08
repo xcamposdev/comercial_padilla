@@ -49,14 +49,14 @@ class MaterialDeliverySaleOrder(models.Model):
                          ('package_id', '=', pack.x_package.id),
                          ('quantity', '>', 0)], limit=1)
                     location_id = stock_quantity.location_id.id
-                    available_qty = stock_quantity.quantity - stock_quantity.reserved_quantity
-                    available_per_pack = MaterialDeliverySaleOrder._get_available_per_pack(available_qty, pack.qty)
-                    if available_per_pack != 0 and requested_qty >= available_per_pack:
+                    packs_requested = MaterialDeliverySaleOrder._get_available_per_pack(
+                        requested_qty, stock_quantity.quantity - stock_quantity.reserved_quantity, pack.qty)
+                    if packs_requested != 0:
                         picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                         self._generate_move_lines(move_ref, picking_id, stock_quantity,
-                                                  available_per_pack, location_id, stock_id, pack.x_package.id)
+                                                  packs_requested, location_id, stock_id, pack.x_package.id)
                         picking_id.action_confirm()
-                        requested_qty -= available_per_pack
+                        requested_qty -= packs_requested
 
                 if requested_qty > 0:
                     stock_quantity = stock_quantity.search(
@@ -82,14 +82,21 @@ class MaterialDeliverySaleOrder(models.Model):
         return sale
 
     @staticmethod
-    def _get_available_per_pack(requested_qty, pack_qty):
-        if requested_qty == 0:
+    def _get_available_per_pack(requested_qty, available, pack_qty):
+        if requested_qty == 0 or available == 0 or pack_qty > requested_qty:
             return 0
+        result = 0
         vals = range(0, int(requested_qty))
         values = [vals[i:i + int(pack_qty)] for i in range(0, len(vals), int(pack_qty))]
         if len(values[-1]) != int(pack_qty):
             del values[-1]
-        return len(values) * pack_qty
+        for pack in values:
+            if available >= pack_qty:
+                available -= pack_qty
+                result += pack_qty
+            else:
+                break
+        return result
 
     def _generate_extra_moves_by_location(self, available_locations, move_ref, requested_qty, stock_id):
         for squant in available_locations:
