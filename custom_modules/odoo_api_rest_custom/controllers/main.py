@@ -190,7 +190,7 @@ class ApiAccess(http.Controller):
                     #get users with params
                     data = request.env['res.partner'].sudo().search([('id', '=', user_id)],limit = 1) 
 
-                    if data:
+                    if data and data is not False:
                         user = {
                             'id': data.id,
                             'name': data.name,
@@ -201,11 +201,14 @@ class ApiAccess(http.Controller):
                             'vat': data.vat
                         }
 
-                    headers = {'Content-type': 'application/json'}
-                    Response.status = "200"
-                    data = {'code': 200, 'user': user, 'message': 'success'}   
-                    return data
-                            
+                        headers = {'Content-type': 'application/json'}
+                        Response.status = "200"
+                        data = {'code': 200, 'user': user, 'message': 'success'}   
+                        return data
+                    else:
+                        Response.status = "204"
+                        data = {'code': 204, 'user': False, 'message': 'El usuario no existe'}   
+                        return data 
                 except Exception as e:
                     se = _serialize_exception(e)
                     error = {
