@@ -1,12 +1,13 @@
 import json
 import logging
+import base64
 import werkzeug
 
-from odoo import http
+from odoo import http, api, tools
+from datetime import datetime
 from odoo.http import content_disposition, request, Response, Controller , route, JsonRequest
 from odoo.addons.web.controllers.main import _serialize_exception
 from odoo.tools import date_utils
-from odoo.tools import html_escape
 from functools import wraps
 
 from odoo.exceptions import AccessError, AccessDenied
@@ -43,7 +44,7 @@ class ApiAccess(http.Controller):
             return f(*args, **kwargs)
         return wrap
 
-    @http.route('/api/web/get_products', type='json', auth='user', methods=['POST'], website=False, customresp='apiresponse')
+    @http.route('/api/web/get_products', type='json', auth='user', methods=['GET'], website=False, customresp='apiresponse')
     def get_products(self):       
         uid = request.session.uid
 
@@ -61,8 +62,10 @@ class ApiAccess(http.Controller):
                     limit = request.params['limit']
 
                 all_products = request.env['product.template'].search([('active', '=', 'true')], order='id asc', offset = page, limit = limit) 
-
                 for p in all_products:
+                    sellers = []
+                    for s in p.seller_ids:
+                        sellers.append(s.name.name)
                     item = {
                         'id': p.id,
                         'default_code': p.default_code,
@@ -70,11 +73,11 @@ class ApiAccess(http.Controller):
                         'weight': p.weight,
                         'categ_id': p.categ_id.id,
                         'x_manufacturar_code': p.x_manufacturar_code if hasattr(p,'x_manufacturar_code') else '',
-                        'image': p.image_1920,
-                        'seller_ids':p.seller_ids.name.name
+                        'image': p.image_1920 if p.image_1920 else '',
+                        'seller_ids': ", ".join(sellers)
                     }
                     products.append(item)
-                Response.status = "200"    
+                Response.status = "200"  
                 return {'code': 200, 'products': products, 'message': 'success'}
             except Exception as e:
                 se = _serialize_exception(e)
@@ -89,7 +92,7 @@ class ApiAccess(http.Controller):
             Response.status = "401 unauthorized"
             return {'code': 401, 'error': 'Usuario no registrado o no tiene accesso a este servicio', 'message': 'error'}
 
-    @http.route('/api/web/get_categories', type='json', auth='user', methods=['POST'], website=False, customresp='apiresponse')
+    @http.route('/api/web/get_categories', type='json', auth='user', methods=['GET'], website=False, customresp='apiresponse')
     def get_categories(self):
         uid = request.session.uid
 
@@ -130,7 +133,7 @@ class ApiAccess(http.Controller):
             Response.status = "401 unauthorized"
             return {'code': 401, 'error': 'Usuario no registrado o no tiene accesso a este servicio', 'message': 'error'}
     
-    @http.route('/api/web/get_users', type='json', auth='user', methods=['POST'], website=False, customresp='apiresponse')
+    @http.route('/api/web/get_users', type='json', auth='user', methods=['GET'], website=False, customresp='apiresponse')
     def get_users(self):
         uid = request.session.uid
         
@@ -179,7 +182,7 @@ class ApiAccess(http.Controller):
             Response.status = "401 unauthorized"
             return {'code': 401, 'error': 'Usuario no registrado o no tiene accesso a este servicio', 'message': 'error'}
     
-    @http.route('/api/web/get_users/<int:user_id>', type='json', auth='user', methods=['POST'], website=False, customresp='apiresponse')
+    @http.route('/api/web/get_users/<int:user_id>', type='json', auth='user', methods=['GET'], website=False, customresp='apiresponse')
     def get_user(self, user_id):
         uid = request.session.uid
 
@@ -226,9 +229,97 @@ class ApiAccess(http.Controller):
             return {'code': 401, 'error': 'Usuario no registrado o no tiene accesso a este servicio', 'message': 'error'}
     
     @http.route('/api/web/order', type='json', auth='user', methods=['POST'], website=False, customresp='apiresponse')
-    def create_order(self):
-        _logger.info('entro')
-        return True
+    def create_order(self, **kw):
+        uid = request.session.uid
+
+        if uid:
+            try:
+                partner_id = kw.get('partner_id', 0)
+                partner = request.env['res.partner'].sudo().search([('id', '=', int(partner_id)),('active', '=', 'true')]) 
+                
+                if partner.id is not False:
+                    if 'date_order' in kw:
+                        date = kw.get('date_order')
+                        try:
+                            do = datetime.strptime(date, "%d/%m/%Y").date()
+                            date_order = do.strftime('%Y-%m-%d %H:%M:%S')
+                        except Exception as e:
+                            se = _serialize_exception(e)
+                            error = {
+                                'code': 400,
+                                'message': 'Error',
+                                'error': e
+                            }
+                            Response.status = "400 Bad Request"
+                            return error 
+                    else:
+                        error = {
+                                'code': 400,
+                                'message': 'Error',
+                                'error': 'La peticion es incorrecta, el parametro date_order no es correcto (d/m/Y) o no existe'
+                            }
+                        Response.status = "400 Bad Request"
+                        return error
+                    
+                    order_lines = kw.get('order_line', [])
+                    order_line = []
+
+                    for product in order_lines:
+                        product_id = request.env['product.product'].sudo().search([('product_tmpl_id','=',product['product_id'])])
+                        if product_id.id is not False:
+                            order_line.append(
+                                (0, 0, {
+                                    'product_id': product_id.id,
+                                    'product_uom_qty': product['product_uom_qty'],
+                                    'price_unit': product['price_unit'],
+                                    'discount': product['discount'],
+                                }))
+                        else:
+                            error = {
+                                'code': 400,
+                                'message': 'Error',
+                                'error': 'La peticion es incorrecta, el parametro product_id no se encuentra o no existe'
+                            }
+                            Response.status = "400 Bad Request"
+                            return error
+                    order = {
+                        'partner_id': partner_id,
+                        'date_order': date_order,
+                        'order_line': order_line,
+                    }
+
+                    insert_order = request.env['sale.order'].sudo().create(order)
+                    if insert_order.id is not False:
+                        Response.status = "201 Created"
+                        return {'code':201, 'order_id': insert_order.id, 'message': 'success'}
+                    else:
+                        error = {
+                                'code': 500,
+                                'message': 'Error',
+                                'error': 'No se pudo registrar el pedido'
+                            }
+                        Response.status = "500 Server Error"
+                        return error
+                else:
+                    error = {
+                                'code': 400,
+                                'message': 'Error',
+                                'error': 'La peticion es incorrecta, el parametro partner_id no se encuentra o no existe'
+                            }
+                    Response.status = "400 Bad Request"
+                    return error
+            except Exception as e:
+                se = _serialize_exception(e)
+                error = {
+                    'code': 400,
+                    'message': 'Error',
+                    'error': e
+                }
+                Response.status = "400 Bad Request"
+                return error
+        else:    
+            Response.status = "401 unauthorized"
+            return {'code': 401, 'error': 'Usuario no registrado o no tiene accesso a este servicio', 'message': 'error'}
     
     #aux - get params
     def get_params(self):
