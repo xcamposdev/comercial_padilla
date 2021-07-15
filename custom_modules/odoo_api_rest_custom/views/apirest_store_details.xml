@@ -6,10 +6,12 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Datos Integración API Rest">
-                    <field name="x_api_url"/>
                     <field name="x_api_db"/>
                     <field name="x_api_username" />
-                    <field name="x_api_password"/>                    
+                    <field name="x_api_password"/>
+                    <field name="x_api_token_expire_days"/>
+                    <field name="x_api_token"/>
+                    <field name="x_api_token_expire"/>                    
                 </tree>
             </field>
         </record>
@@ -19,16 +21,23 @@
             <field name="model">apirest.store.details</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Datos Integracion">
+                <form>
                     <sheet>
                         <group>
-                            <field name="x_api_url" required="1"/>
-                            <field name="x_api_db" required="1"/>
-                            <field name="x_api_username" required="1"/>
-                            <field name="x_api_password" required="1"/>
+                            <group>
+                                <field name="x_api_db" required="1"/>
+                                <field name="x_api_username" required="1"/>
+                                <field name="x_api_password" required="1"/>
+                                <field name="x_api_token_expire_days" required="1"/>
+                                <field name="x_api_token"/>
+                                <field name="x_api_token_expire"/>
+                            </group>
+                        </group>
+                        <group>
+                            <button string="Generar Token" icon="fa-key" class="oe_highlight" name="generate_new_token" type="object"/>
                         </group>
                     </sheet>
-                </form>
+                </form>                   
             </field>
         </record>
 
