@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_registration_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div class="row" style="border: 1px solid black; border-top: none;">
+                        <div t-if="o.origin" class="col-6">
+                            <h5>Documento Origen: <span t-field="o.origin"/></h5>
+                            <div class="col-6 text-center">
+                                <img class="barcode" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o.origin, 400, 67)" alt="Barcode"></img>&amp;nbsp;
+                            </div>
+                        </div>
+                        <div t-else="" class="col-12">
+                            <h3>No tiene documento de origen</h3>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <report id="action_report_registration_order" model="stock.picking" report_type="qweb-pdf" name="stock_move_barcode_track.report_registration_order" string="Matrícula pedido" file="stock_move_barcode_track.report_registration_order" paperformat="stock_move_barcode_track.paperformat_a6"/>
+</odoo>
