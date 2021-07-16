@@ -6,7 +6,6 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Datos Integración API Rest">
-                    <field name="x_api_db"/>
                     <field name="x_api_username" />
                     <field name="x_api_password"/>
                     <field name="x_api_token_expire_days"/>
@@ -25,7 +24,6 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name="x_api_db" required="1"/>
                                 <field name="x_api_username" required="1"/>
                                 <field name="x_api_password" required="1"/>
                                 <field name="x_api_token_expire_days" required="1"/>

@@ -71,23 +71,24 @@ class ApiAccess(http.Controller):
     def get_products(self):       
         try:
             products = []
-            params = request.jsonrequest['params']
+            params = self.get_api_params()
 
-            page = 0
-            limit = 1000
-
-            if 'page' in params:
-                page = request.params['page']
-            if 'limit' in params:
-                limit = request.params['limit']
-
-            all_products = request.env['product.template'].sudo().search([('active', '=', 'true')], order='id asc', offset = page, limit = limit)
-            base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            if params.get('error') is not None:
+                error = {
+                    'code': 400,
+                    'message': 'Error',
+                    'error': params.get('error')
+                }
+                Response.status = "400 Bad Request"
+                return error
+            else:
+                page = params.get('page')
+                step = params.get('step')
+                limit= params.get('limit')
+              
+            all_products = request.env['product.template'].sudo().search([('active', '=', 'true')], order ='id asc', offset = (page - 1) * step, limit = limit)
             for p in all_products:
                 sellers = []
-                prod_image = ''
-                if p.image_1920:
-                    prod_image = str(base_url) + '/web/content/product.template/'+ str(p.id) +'/image_1920'
                 for s in p.seller_ids:
                     sellers.append(s.name.name)
                 item = {
@@ -97,7 +98,6 @@ class ApiAccess(http.Controller):
                     'weight': p.weight,
                     'categ_id': p.categ_id.id,
                     'x_manufacturar_code': p.x_manufacturar_code if hasattr(p,'x_manufacturar_code') else '',
-                    'image': prod_image,
                     'seller_ids': ", ".join(sellers)
                 }
                 products.append(item)
@@ -118,17 +118,22 @@ class ApiAccess(http.Controller):
     def get_categories(self):
         try:
             categories = []
-            params = request.jsonrequest['params']
+            params = self.get_api_params()
 
-            page = 0
-            limit = 1000
-
-            if 'page' in params:
-                page = request.params['page']
-            if 'limit' in params:
-                limit = request.params['limit']
+            if params.get('error') is not None:
+                error = {
+                    'code': 400,
+                    'message': 'Error',
+                    'error': params.get('error')
+                }
+                Response.status = "400 Bad Request"
+                return error
+            else:
+                page = params.get('page')
+                step = params.get('step')
+                limit= params.get('limit')
             
-            all_category = request.env['product.category'].sudo().search([], order='id asc', offset=page, limit = limit) 
+            all_category = request.env['product.category'].sudo().search([], order = 'id asc', offset = (page - 1) * step, limit = limit) 
 
             for c in all_category:
                 item = {
@@ -153,18 +158,24 @@ class ApiAccess(http.Controller):
     @http.route('/api/web/get_users', type='json', auth='none', methods=['GET'], website=False, csrf=False, customresp='apiresponse')
     def get_users(self):
         try:
-            page = 0
-            limit = 1000
             users = []
-            params = request.jsonrequest['params']
+            params = self.get_api_params()
 
-            if 'page' in params:
-                page = request.params['page']
-            if 'limit' in params:
-                limit = request.params['limit']
+            if params.get('error') is not None:
+                error = {
+                    'code': 400,
+                    'message': 'Error',
+                    'error': params.get('error')
+                }
+                Response.status = "400 Bad Request"
+                return error
+            else:
+                page = params.get('page')
+                step = params.get('step')
+                limit= params.get('limit')
         
             #get users with params
-            all_users = request.env['res.partner'].sudo().search([('active', '=', 'true')], order='id asc', offset=page, limit = limit) 
+            all_users = request.env['res.partner'].sudo().search([('active', '=', 'true')], order = 'id asc', offset = (page - 1) * step, limit = limit) 
 
             for u in all_users:
                 item = {
@@ -193,15 +204,46 @@ class ApiAccess(http.Controller):
             Response.status = "400 Bad Request"  
             return error
 
+    @validate_token
+    @http.route('/api/web/get_product_image', type='json', auth='none', methods=['GET'], csrf=False, website=False, customresp='apiresponse')
+    def get_product_image(self, product_id):
+            try:
+                if int(product_id):
+                    #get users with params
+                    product = request.env['product.template'].sudo().search([('id', '=', int(product_id)),('image_1920', '!=', False)], limit = 1)
+                    if product:
+                        image = product.image_1920
+                        Response.status = "200"
+                        return {'code':200, 'image': image, 'message':'success'}
+                    else: 
+                        Response.status = "200"
+                        return {'code':200, 'image': False, 'message':'success'}
+                else:
+                    error = {
+                        'code': 400,
+                        'message': 'Ocurrio un error al realizar una consulta, verifique el valor del product_id, debe ser un numero.',
+                        'error': 'La peticion es incorrecta, el id del producto no se encuentra o no existe.'
+                    }
+                    Response.status = "400 Bad Request"
+                    return error  
+            except Exception as e:
+                se = _serialize_exception(e)
+                error = {
+                    'code': 400,
+                    'message': 'Ocurrio un error al realizar una consulta, verifique el valor del product_id, debe ser un numero',
+                    'error': se
+                }
+                Response.status = "400 Bad Request"
+                return error        
     
     @validate_token
     @http.route('/api/web/get_users/<int:user_id>', type='json', auth='none', methods=['GET'], csrf=False, website=False, customresp='apiresponse')
     def get_user(self, user_id):
-        if int(user_id):
-            user = False
-            try:
+        try:
+            if int(user_id):
+                user = False
                 #get users with params
-                data = request.env['res.partner'].sudo().search([('id', '=', user_id)],limit = 1) 
+                data = request.env['res.partner'].sudo().search([('id', '=', int(user_id))],limit = 1) 
 
                 if data and data is not False:
                     user = {
@@ -221,19 +263,20 @@ class ApiAccess(http.Controller):
                 else:
                     Response.status = "204"
                     data = {'code': 204, 'user': False, 'message': 'El usuario no existe'}   
-                    return data 
-            except Exception as e:
-                se = _serialize_exception(e)
-                error = {
-                    'code': 400,
-                    'message': 'Ocurrio un error al realizar una consulta',
-                    'error': se
-                }
+                    return data
+            else:
                 Response.status = "400 Bad Request"
-                return error            
-        else:
+                return {'code': 400, 'error': 'Identificador de usuario no valido', 'message': 'error'}
+        except Exception as e:
+            se = _serialize_exception(e)
+            error = {
+                'code': 400,
+                'message': 'Ocurrio un error al realizar una consulta, verifique el identificador de usuario.',
+                'error': se
+            }
             Response.status = "400 Bad Request"
-            return {'code': 400, 'error': 'Identificador de usuario no valido', 'message': 'error'}
+            return error            
+        
 
     
     @validate_token
@@ -325,13 +368,33 @@ class ApiAccess(http.Controller):
             return error
     
     #aux - get params
-    def get_params(self):
+    def get_api_params(self):
         try:
-            params = request.jsonrequest['params']
-            return params
-        except:
-            error = 'Bad Request - Los parametros son incorrectos.'
-            return {'code': 400, 'error': error, 'message': 'error'}
+            params = request.jsonrequest.get('params',{})
+            result = {}
+            # valores de busqueda por defecto    
+            page = 1
+            step = 1000 
+            limit= 1000
+            
+            if 'page' in params:
+                page = int(request.params['page']) if int(request.params['page']) > 0 else False
+
+            if 'limit' in params:
+                limit = int(request.params['limit']) if int(request.params['limit']) > 0 else False
+                step = limit
+
+            if limit is False or page is False:
+                error = 'Parametros incorrectos, page y limit deben ser numeros mayores a 0.'            
+                result = {'error': error, 'status': False}
+            else:
+                result = {'page': page, 'limit': limit, 'step': step}
+            return result
+
+        except Exception as e:
+            error = 'Parametros incorrectos, page y limit deben ser numeros mayores a 0.'            
+            result = {'error': error, 'status': False}
+            return result 
 
     #this method override the default response 
     def _json_response(self, result=None, error=None):

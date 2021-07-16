@@ -4,7 +4,6 @@ import json
 import hashlib
 import os
 import uuid
-
 from datetime import datetime, timedelta
 from odoo import models, fields, api, _
 from requests import request
@@ -16,7 +15,6 @@ class ApiRestStoreDetails(models.Model):
 
     _name = "apirest.store.details"
 
-    x_api_db = fields.Char("Base de Datos", required=True, help="Nombre de la Base de datos.")
     x_api_username = fields.Char("Usuario", required=True, help="Nombre del usuario.")
     x_api_password = fields.Char("Password", required=True, help="Password del usuario.")
     x_api_token_expire_days = fields.Char("Validez Token(Nº de dias)", required=True, default="5", help="tiempo en dias de la validez del tokena partir de hoy, por defecto 5 dias.")
