@@ -6,9 +6,9 @@
     'description': """
         This module extends the barcode module functionality to redirect to a Sale by barcode
     """,
-    'version': '1.0.0.0',
+    'version': '0.1',
     'author': 'Develoop Software S.A.',
-    'category': 'Padilla',
+    'category': 'Develoop',
     'website': 'https://www.develoop.net/',
 
     # any module necessary for this one to work correctly
@@ -19,6 +19,7 @@
         'data/paperformat.xml',
         'views/views.xml',
     ],
-   'images': ['static/description/icon.png'],
-   'installable': True,
+    'images': ['static/description/icon.png'],
+    'demo': [],
+    'installable': True,
 }
