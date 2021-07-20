@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="product.product_template_search_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='categ_id']" position="before">
-                    <field name="x_product_default_code" filter_domain="[('default_code', '=', self)]" string="Por Referencia Fabricante" />
+                    <field name="x_product_default_code" filter_domain="[('x_manufacturer_code', '=', self)]" string="Por Referencia Fabricante" />
                 </xpath>
             </field>
         </record>
