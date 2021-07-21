@@ -11,7 +11,7 @@
                     </div>
                     <div class="row" style="border: 1px solid black; border-top: none;">
                         <div t-if="o.origin" class="text-center">
-                            <img class="barcode" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o.origin, 900, 700)" alt="Barcode"></img>&amp;nbsp;
+                            <img class="barcode" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o.origin, 800, 600)" alt="Barcode"></img>&amp;nbsp;
                         </div>
                     </div>
                 </div>
