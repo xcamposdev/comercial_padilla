@@ -1,21 +1,14 @@
 import json
-import logging
-import base64
-import io
 from os import access
 import werkzeug
 import functools
-from datetime import datetime, timedelta
 
-from odoo import http, api, tools
+from odoo import http, api
 from datetime import datetime
 from odoo.http import content_disposition, request, Response, Controller , route, JsonRequest
 from odoo.addons.web.controllers.main import _serialize_exception
 from odoo.tools import date_utils
 from functools import wraps
-
-from odoo.exceptions import AccessError, AccessDenied
-_logger = logging.getLogger(__name__)
 
 def validate_token(f):
     """."""
@@ -67,42 +60,58 @@ class ApiAccess(http.Controller):
             return {'code': 200, 'error': 'Metodo ya no utilizado, dirijase al backoffice de Oddo para obtener el token.', 'message': 'info'}
 
     @validate_token
-    @http.route('/api/web/get_products', type='json', auth='none', methods=['GET'], website=False, csrf=False, customresp='apiresponse')
-    def get_products(self):       
+    @http.route('/api/web/get_products/<int:user_id>', type='json', auth='none', methods=['GET'], website=False, csrf=False, customresp='apiresponse')
+    def get_products(self, **kw):       
         try:
-            products = []
-            params = self.get_api_params()
+            user_id = kw.get('user_id', 0)
+            if int(user_id) > 0:
+                products = []
+                params = self.get_api_params()
 
-            if params.get('error') is not None:
-                error = {
-                    'code': 400,
-                    'message': 'Error',
-                    'error': params.get('error')
-                }
-                Response.status = "400 Bad Request"
-                return error
+                if params.get('error') is not None:
+                    error = {
+                        'code': 400,
+                        'message': 'Error',
+                        'error': params.get('error')
+                    }
+                    Response.status = "400 Bad Request"
+                    return error
+                else:
+                    page = params.get('page')
+                    step = params.get('step')
+                    limit= params.get('limit')
+                
+                user = request.env['res.partner'].sudo().search([('id', '=', int(user_id))], order ='id asc', limit = 1)
+                all_products = user.property_product_pricelist if len(user) > 0 else [] #user.property_product_pricelist.item_ids 
+                products_by_user = all_products.item_ids if len(all_products) > 0 else []
+    
+                for prods in products_by_user:
+                    for p in prods.product_tmpl_id:
+                        sellers = []
+                        price = 0.0
+
+                        if prods.fixed_price:
+                            price = prods.fixed_price
+
+                        for s in p.seller_ids:
+                            sellers.append(s.name.name)
+        
+                        item = {
+                            'id': p.id,
+                            'default_code': p.default_code,
+                            'description_sale': p.description_sale,
+                            'price': price,
+                            'weight': p.weight,
+                            'categ_id': p.categ_id.id,
+                            'x_manufacturer_code': p.x_manufacturer_code if hasattr(p,'x_manufacturer_code') else '',
+                            'seller_ids': ", ".join(sellers)
+                        }
+                        products.append(item)
+                Response.status = "200"  
+                return {'code': 200, 'products': products, 'message': 'success'}
             else:
-                page = params.get('page')
-                step = params.get('step')
-                limit= params.get('limit')
-              
-            all_products = request.env['product.template'].sudo().search([('active', '=', 'true')], order ='id asc', offset = (page - 1) * step, limit = limit)
-            for p in all_products:
-                sellers = []
-                for s in p.seller_ids:
-                    sellers.append(s.name.name)
-                item = {
-                    'id': p.id,
-                    'default_code': p.default_code,
-                    'description_sale': p.description_sale,
-                    'weight': p.weight,
-                    'categ_id': p.categ_id.id,
-                    'x_manufacturar_code': p.x_manufacturar_code if hasattr(p,'x_manufacturar_code') else '',
-                    'seller_ids': ", ".join(sellers)
-                }
-                products.append(item)
-            Response.status = "200"  
-            return {'code': 200, 'products': products, 'message': 'success'}
+                Response.status = "400 Bad Request"
+                return {'code': 400, 'error': 'Identificador de usuario no valido', 'message': 'error'}
         except Exception as e:
             se = _serialize_exception(e)
             error = {
@@ -238,9 +247,10 @@ class ApiAccess(http.Controller):
     
     @validate_token
     @http.route('/api/web/get_users/<int:user_id>', type='json', auth='none', methods=['GET'], csrf=False, website=False, customresp='apiresponse')
-    def get_user(self, user_id):
+    def get_user(self, **kw):
         try:
-            if int(user_id):
+            user_id = kw.get('user_id', 0)
+            if int(user_id) > 0:
                 user = False
                 #get users with params
                 data = request.env['res.partner'].sudo().search([('id', '=', int(user_id))],limit = 1) 
