@@ -3,6 +3,9 @@
 
 from odoo import fields, models, api
 from odoo.osv import expression
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class Product_Template_Custom(models.Model):
 
@@ -11,7 +14,9 @@ class Product_Template_Custom(models.Model):
     x_manufacturer_code = fields.Char(string="Código fabricante")
 
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        _logger.info("PARAMETROS \n\n %s \n\n %s \n\n %s \n\n %s \n\n %s \n\n %s \n\n", args, offset, limit, order, count, access_rights_uid)
         if args:
+            _logger.info("ERNTROI")
             for arg in args:
                 if 'barcode' in arg and len(arg) == 3:
                     stock_packaging = self.env['product.packaging'].search([('barcode',arg[1],arg[2])])
