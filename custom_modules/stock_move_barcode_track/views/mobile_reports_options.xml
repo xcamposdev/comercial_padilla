@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-extend="stock_barcode_settings_widget">
+        <t t-jquery=".o_print_barcodes_pdf" t-operation="after">
+           <button t-if="widget.model == 'stock.picking'" class="btn-lg btn btn-dark text-uppercase o_print_matricula_pdf">Matrícula pedido</button>
+        </t>
+    </t>
+</templates>
