@@ -15,7 +15,13 @@ class Product_Template_Custom(models.Model):
             for arg in args:
                 if 'barcode' in arg and len(arg) == 3:
                     stock_packaging = self.env['product.packaging'].search([('barcode',arg[1],arg[2])])
-                    product_ids = list(data['product_id'].id for data in stock_packaging)
-                    _logger.info("product_ids: \n\n %s \n\n", product_ids)
+                    product_ids = []
+                    bad_products = []
+                    for data in stock_packaging:
+                        if data['product_id'].id:
+                            product_ids.append(data['product_id'].id)
+                        else:
+                            bad_products.append(data)
+                    _logger.info("bad product_ids: \n\n %s \n\n", bad_products)
                     args = expression.OR([[('product_variant_ids', 'in', product_ids)], list(args)])
         return super(Product_Template_Custom, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
