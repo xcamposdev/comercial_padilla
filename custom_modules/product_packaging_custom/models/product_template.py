@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo import fields, models, api
+import logging
+from odoo import fields, models
 from odoo.osv import expression
+
+_logger = logging.getLogger(__name__)
+
 
 class Product_Template_Custom(models.Model):
 
@@ -15,13 +18,7 @@ class Product_Template_Custom(models.Model):
             for arg in args:
                 if 'barcode' in arg and len(arg) == 3:
                     stock_packaging = self.env['product.packaging'].search([('barcode',arg[1],arg[2])])
-                    product_ids = []
-                    bad_products = []
-                    for data in stock_packaging:
-                        if data['product_id'].id:
-                            product_ids.append(data['product_id'].id)
-                        else:
-                            bad_products.append(data)
-                    _logger.info("bad product_ids: \n\n %s \n\n", bad_products)
+                    product_ids = [data['product_id'].id for data in stock_packaging if data['product_id'].id]
+                    _logger.info("\n\nProduct id list: \n\n%s\n\n", product_ids)
                     args = expression.OR([[('product_variant_ids', 'in', product_ids)], list(args)])
         return super(Product_Template_Custom, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
