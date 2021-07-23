@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_purchase_custom" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.purchase.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="26"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='purchase_setting_container']" position="after">
+                <h2>Movimientos de Inventario</h2>
+                <div class="row mt16 o_settings_container">
+                    <div class="col-12 col-lg-6 o_setting_box" title="Este valor por defecto es aplicado a todas las compras que se realizen. Esto puede ser modificado en la vista otros de la compra.">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <label for="x_picking_type_id"/>
+                            <div class="text-muted">
+                                Destino por defecto
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="x_picking_type_id"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
