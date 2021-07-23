@@ -13,7 +13,7 @@ class StockBarcodeControllerCustom(StockBarcodeController):
         try_open_sale_order = StockBarcodeControllerCustom.try_open_sale_order(barcode)
         if try_open_sale_order:
             return try_open_sale_order
-        super(StockBarcodeControllerCustom, self).main_menu(barcode, **kw)
+        return super(StockBarcodeControllerCustom, self).main_menu(barcode, **kw)
 
     @staticmethod
     def try_open_sale_order(barcode):
