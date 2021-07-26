@@ -23,6 +23,11 @@
 	url = git@github.com:OCA/partner-contact.git
 	branch = 13.0
 
+[submodule "OCA/community-data-files"]
+	path = OCA/community-data-files
+	url = git@github.com:OCA/community-data-files.git
+	branch = 13.0
+
 [submodule "OCA/reporting-engine"]
 	path = OCA/reporting-engine
 	url = git@github.com:OCA/reporting-engine.git
