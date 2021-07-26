@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from odoo import api, fields, models, exceptions, _
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo import api, fields, models, _
 
 _logger = logging.getLogger(__name__)
 
 INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
+
 
 class account_discount_custom(models.Model):
 
