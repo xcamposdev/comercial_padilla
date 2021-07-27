@@ -35,7 +35,7 @@ odoo.define('product_packaging_custom.abstract_client_action_custom_js', functio
                         });
                     } else {
                         //--------------------------------------------------------------
-                        if (self.currentState.location_dest_id != undefined && product.x_location != undefined && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
+                        if (!self.has_origin && self.currentState.location_dest_id != undefined && product.x_location != undefined && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
                         {
                             if (self.scannedLines != "")
                             {

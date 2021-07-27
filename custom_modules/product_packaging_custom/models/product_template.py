@@ -6,8 +6,7 @@ from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
 
-
-class Product_Template_Custom(models.Model):
+class ProductTemplateCustom(models.Model):
 
     _inherit = 'product.template'
 
@@ -21,4 +20,4 @@ class Product_Template_Custom(models.Model):
                     product_ids = [data['product_id'].id for data in stock_packaging if data['product_id'].id]
                     _logger.info("\n\nProduct id list: \n\n%s\n\n", product_ids)
                     args = expression.OR([[('product_variant_ids', 'in', product_ids)], list(args)])
-        return super(Product_Template_Custom, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
+        return super(ProductTemplateCustom, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
