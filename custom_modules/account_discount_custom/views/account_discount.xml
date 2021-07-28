@@ -11,6 +11,7 @@
             </xpath>
         
             <xpath expr="//field[@name='price_subtotal']" position="replace">
+                <field name="price_subtotal" string="Subtotal" invisible="True"/>
                 <field name="x_price_subtotal_ui" string="Subtotal" groups="account.group_show_line_subtotals_tax_excluded" force_save="1"/>
             </xpath>
 

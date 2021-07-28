@@ -1,0 +1,58 @@
+<odoo>
+    <data>
+        <record id="view_api_store_details_custom" model="ir.ui.view">
+            <field name="name">API Integration</field>
+            <field name="model">apirest.store.details</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Datos Integración API Rest">
+                    <field name="x_api_username" />
+                    <field name="x_api_password"/>
+                    <field name="x_api_token_expire_days"/>
+                    <field name="x_api_token"/>
+                    <field name="x_api_token_expire"/>                    
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_form_api_store_details_custom" model="ir.ui.view">
+            <field name="name">API Store Details</field>
+            <field name="model">apirest.store.details</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="x_api_username" required="1"/>
+                                <field name="x_api_password" required="1"/>
+                                <field name="x_api_token_expire_days" required="1"/>
+                                <field name="x_api_token"/>
+                                <field name="x_api_token_expire"/>
+                            </group>
+                        </group>
+                        <group>
+                            <button string="Generar Token" icon="fa-key" class="oe_highlight" name="generate_new_token" type="object"/>
+                        </group>
+                    </sheet>
+                </form>                   
+            </field>
+        </record>
+
+        <record id="action_api_store_details_custom" model="ir.actions.act_window">
+            <field name="name">API Integration</field>
+            <field name="res_model">apirest.store.details</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Crear datos de integracion API.
+                </p>
+            </field>
+        </record>
+  
+        <menuitem name="APIREST" id="api_rest_custom"
+            web_icon="odoo_api_rest_custom,static/description/icon.png"
+            sequence="4" />
+        <menuitem id="menu_api_rest_custom" name="API Rest" sequence="1" web_icon="odoo_api_rest_custom,static/description/icon.png" action="action_api_store_details_custom"/>
+    </data>
+</odoo>

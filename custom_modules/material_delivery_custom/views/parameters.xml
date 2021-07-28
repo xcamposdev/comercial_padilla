@@ -1,0 +1,23 @@
+<odoo>
+  
+  <data noupdate="1">
+    <!-- definimos variables de entorno -->
+    <!-- <record id="x_md_default_location_cornella" model="ir.config_parameter">
+        <field name="key">x_md_default_location_cornella</field>
+        <field name="value">20</field>
+    </record> -->
+    <record id="x_md_warehouse_cornella" model="ir.config_parameter">
+        <field name="key">x_md_warehouse_cornella</field>
+        <field name="value">3</field>
+    </record>
+    <record id="x_md_operation_type_cornella" model="ir.config_parameter">
+        <field name="key">x_md_operation_type_cornella</field>
+        <field name="value">22</field>
+    </record>
+    <!-- <record id="x_md_stock_rule_cornella" model="ir.config_parameter">
+        <field name="key">x_md_stock_rule_cornella</field>
+        <field name="value">20</field>
+    </record> -->
+  </data>
+
+</odoo>
