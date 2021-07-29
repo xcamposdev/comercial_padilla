@@ -6,4 +6,4 @@ class ResPartner(models.Model):
 
     _inherit = 'res.partner'
 
-    x_is_tss = fields.Boolean(string='PADILLA/TSS')
+    x_is_tss = fields.Boolean(string='¿Es TSS?')
