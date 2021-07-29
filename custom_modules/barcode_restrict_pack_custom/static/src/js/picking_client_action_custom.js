@@ -5,13 +5,11 @@ odoo.define('barcode_restrict_pack_custom.picking_client_action_custom', functio
     
     PickingClientAction.include({
         _getProductBarcodes: function () {
-            console.log('_getProductBarcodes');
             var self = this;
             var context = {};
             if (this.actionParams.pickingId != undefined) {
                 context['pickingId'] = this.actionParams.pickingId;
             };
-            console.log(context);
             return this._rpc({
                 'model': 'product.product',
                 'method': 'get_all_products_by_barcode',
