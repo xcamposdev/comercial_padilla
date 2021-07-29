@@ -11,9 +11,6 @@ odoo.define('barcode_inventory_custom.inventory_client_action_custom', function 
         },
         _change_source: async function(new_location) {
             var self = this;
-            console.log('_change_source');
-            console.log(self.currentState.id);
-            console.log(new_location);
             const response = await self._rpc({
                     model: 'stock.inventory',
                     method: 'change_source',
@@ -32,15 +29,14 @@ odoo.define('barcode_inventory_custom.inventory_client_action_custom', function 
             */
             var sourceLocation = this.locationsByBarcode[barcode];
             const locationId = this._getLocationId();
-            console.log("entro condicion");
-            console.log(this.mode);
-            console.log(locationId);
-            console.log(sourceLocation);
             if (sourceLocation  && ! (this.mode === 'receipt' || this.mode === 'no_multi_locations')) {
                 // There's nothing to do on the state here, just mark `this.scanned_location`.
                 if (locationId && !this.isChildOf(locationId, sourceLocation)) {
                     self._change_source(sourceLocation).then(function(res) {
-                        console.log(res);
+                        if (!res) {
+                            errorMessage = _t("Unable to change source destination please check contact with the administrator.");
+                            return Promise.reject(errorMessage);
+                        }
                         linesActions.push([self.linesWidget.highlightLocation, [true]]);
                         self.scanned_location = sourceLocation;
                         self.currentStep = 'product';
