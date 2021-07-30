@@ -33,6 +33,10 @@ odoo.define('barcode_inventory_custom.inventory_client_action_custom', function 
                 // There's nothing to do on the state here, just mark `this.scanned_location`.
                 if (locationId && !this.isChildOf(locationId, sourceLocation)) {
                     self._change_source(sourceLocation).then(function(res) {
+                        if (!res) {
+                            errorMessage = _t("Unable to change source destination please check contact with the administrator.");
+                            return Promise.reject(errorMessage);
+                        }
                         linesActions.push([self.linesWidget.highlightLocation, [true]]);
                         self.scanned_location = sourceLocation;
                         self.currentStep = 'product';
