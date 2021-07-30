@@ -182,9 +182,12 @@ odoo.define('barcode_inventory_custom.inventory_client_action_custom', function 
                         }).then(function (theoretical_qty) {
                             res.lineDescription.theoretical_qty = theoretical_qty;
                             if (product.x_package != undefined) {
+                                if (product.x_package == false) {
+                                    errorMessage = 'El Producto seleccionado no cuenta con un empaquetado assignado.';
+                                    return Promise.reject(errorMessage);
+                                }
                                 res.lineDescription['result_package_id'] = [product.x_package[0], product.x_package[1]];
                                 res.lineDescription['package_id'] = [product.x_package[0], product.x_package[1]];
-                                console.log(res);
                             }
                             linesActions.push([self.linesWidget.addProduct, [res.lineDescription, self.actionParams.model]]);
                             self.scannedLines.push(res.id || res.virtualId);
