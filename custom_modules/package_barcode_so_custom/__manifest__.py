@@ -11,6 +11,8 @@
         """,
     'depends': ['base','stock'],
     'data': [
+        'report/menu.xml',
+        'report/print_bultos.xml',
         'views/sequence.xml',
         #'views/assets.xml',
     ],

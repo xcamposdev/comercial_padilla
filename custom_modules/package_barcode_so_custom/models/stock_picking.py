@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import warnings
-from odoo import api, fields, models, exceptions, _
+from odoo import models
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
-#from odoo.exceptions import AccessError, UserError, ValidationError, Warning
-# from openerp.osv import fields, osv
 
 class package_barcode_so_custom_stock_picking(models.Model):
 
@@ -58,3 +55,23 @@ class package_barcode_so_custom_stock_picking(models.Model):
             return package
         else:
             return super(package_barcode_so_custom_stock_picking, self)._put_in_pack(move_line_ids)
+
+    def get_packaging_report_packaging(self):
+        toreturn = list()
+        for record in self:
+            for line in record.move_line_ids_without_package or []:
+                if line.result_package_id:
+                    data_find = list(data for data in toreturn if data['package'] == line.result_package_id.id)
+                    if data_find:
+                        data_find['lines'].append({ 'product': data_find.product_id.display_name, 'quantity': data_find.qty_done })
+                    else:
+                        toreturn.append({ 
+                            'package': line.result_package_id.name,
+                            'sale': record.sale_id.name if record.sale_id else '',
+                            'picking': record.name,
+                            'address': record.partner_id,
+                            'partner': record.partner_id.display_name,
+                            'lines': [{ 'product': line.product_id.display_name, 'quantity': line.qty_done }]
+                        })
+
+        return toreturn
