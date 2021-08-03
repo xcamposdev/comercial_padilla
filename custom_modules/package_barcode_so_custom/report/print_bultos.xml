@@ -15,7 +15,7 @@
                     <t t-set="packages" t-value="docs.get_packaging_report_packaging()"/>
                     <t t-foreach="packages" t-as="o">
                         <div class="row">
-                            <img class="barcode border_custom margin_right_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package'], 220, 200)" style="padding:10px;"/>
+                            <img class="barcode border_custom margin_right_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package_name'], 220, 200)" style="padding:10px;"/>
                             <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['sale'], 200, 200)" style="padding:10px;"/>
                             <img class="barcode border_custom margin_left_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['picking'], 300, 200)" style="padding:10px; "/>
                         </div>
