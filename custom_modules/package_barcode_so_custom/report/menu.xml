@@ -2,7 +2,7 @@
 <odoo>
 
     <report id="action_report_package_sale_order" 
-            string="Imprimir Bultos" 
+            string="Imprimir bultos" 
             model="stock.picking" 
             report_type="qweb-pdf" 
             name="package_barcode_so_custom.report_package_sale_order" 

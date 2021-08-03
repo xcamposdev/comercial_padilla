@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+       <template id="assets_backend_package_barcode_sc_custom" name="assets_backend_package_barcode_sc_custom" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/package_barcode_so_custom/static/src/js/settings_widget.js"></script>
+                <script type="text/javascript" src="/package_barcode_so_custom/static/src/js/picking_client_acction.js"></script>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>
