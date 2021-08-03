@@ -9,12 +9,15 @@
     'description': """
         - Empaquetar bultos pedido venta
         """,
-    'depends': ['base','stock'],
+    'depends': ['base', 'web', 'sale', 'stock_barcode', 'stock_move_barcode_track'],
     'data': [
         'report/menu.xml',
         'report/print_bultos.xml',
+        'views/assets.xml',
         'views/sequence.xml',
-        #'views/assets.xml',
+    ],
+    'qweb': [
+        'static/src/xml/mobile_reports_option.xml',
     ],
     'demo': [],
     'installable': True,
