@@ -58,7 +58,7 @@
                           <div class="col-2 text-center" style="width:14%;">
                             <h3 class="border_custom" style="position:absolute; bottom:0; padding:10px 5px 10px 5px;">
                               <t t-esc="nro_page"/> / <t t-esc="len(packages)"/>
-                            </h2>
+                            </h3>
                           </div>
                         </div>
 
