@@ -109,8 +109,10 @@ class package_barcode_so_custom_stock_picking(models.Model):
                 if line.result_package_id:
                     data_find = list(data for data in toreturn if data['package_id'] == line.result_package_id.id)
                     if data_find:
-                        data_find['lines'].append({ 'product': data_find.product_id.display_name, 'quantity': data_find.qty_done })
+                        data_find[0]['lines'].append({ 'product': line.product_id.display_name, 'quantity': line.qty_done })
                     else:
+                        line_to_add = list()
+                        line_to_add.append({ 'product': line.product_id.display_name, 'quantity': line.qty_done })
                         toreturn.append({ 
                             'package_id': line.result_package_id.id,
                             'package_name': line.result_package_id.name,
@@ -118,7 +120,7 @@ class package_barcode_so_custom_stock_picking(models.Model):
                             'picking': record.name,
                             'address': record.partner_id,
                             'partner': record.partner_id.display_name,
-                            'lines': [{ 'product': line.product_id.display_name, 'quantity': line.qty_done }]
+                            'lines': line_to_add
                         })
 
         return toreturn
