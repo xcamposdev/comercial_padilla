@@ -7,7 +7,6 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
-
                 <xpath expr="//notebook"  position="before">
                     <group>
                         <field name="x_is_tss"/>
@@ -16,7 +15,17 @@
             </field>
         </record>
 
-
-
+        <record id="view_company_form_padilla_custom" model="ir.ui.view">
+            <field name="name">padilla_tss_partner.company.custom.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook"  position="before">
+                    <group>
+                        <field name="x_is_tss"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>
