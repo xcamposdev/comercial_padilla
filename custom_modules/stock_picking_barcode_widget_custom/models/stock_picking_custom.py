@@ -8,7 +8,7 @@ class StockPicking_Custom(models.Model):
         response = super(StockPicking_Custom, self).get_action_picking_tree_ready_kanban()
         is_intersect_context = response.get('context')
         
-        if self.name == 'PICK':
+        if self.id == self.warehouse_id.pick_type_id:
             is_intersect_context.update({'search_default_picking_type_id': 0})
             is_intersect_context.update({'default_picking_type_id': 0})
             is_intersect_context.update({'search_default_state': 0})
