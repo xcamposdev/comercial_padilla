@@ -6,7 +6,6 @@ odoo.define('stock_picking_barcode_widget.header_back_widget_custom_js', functio
     BackWidget.include({
         _onClickExit: function (ev) {
             ev.stopPropagation();
-            console.log('back to list');
             var self = this;
             var code = localStorage.getItem('selected_barcode');
             if(code != null) {
