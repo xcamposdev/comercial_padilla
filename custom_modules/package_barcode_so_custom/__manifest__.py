@@ -11,6 +11,7 @@
         """,
     'depends': ['base', 'web', 'sale', 'stock_barcode', 'stock_move_barcode_track'],
     'data': [
+        'data/paperformat.xml',
         'report/menu.xml',
         'report/print_bultos.xml',
         'views/assets.xml',
