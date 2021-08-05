@@ -1,9 +1,6 @@
-import logging
 import threading
 from odoo import models
 from odoo.exceptions import UserError
-
-_logger = logging.getLogger(__name__)
 
 
 class MaterialDeliverySaleOrder(models.Model):
@@ -148,7 +145,7 @@ class MaterialDeliverySaleOrder(models.Model):
     def create_stock_piking_material_delivery(self, last_move, location_id, dest_location_id):
         stock_picking_values = {
             'partner_id': self.partner_id.id,
-            'picking_type_id': self._get_stock_picking_type(location_id, dest_location_id),
+            'picking_type_id': self.warehouse_id.int_type_id.id,
             'location_id': location_id,
             'location_dest_id': dest_location_id,
             'scheduled_date': last_move.date,
@@ -158,22 +155,3 @@ class MaterialDeliverySaleOrder(models.Model):
         }
         res = self.env['stock.picking'].create(stock_picking_values)
         return res
-
-    def _get_stock_picking_type(self, location_id, dest_location_id):
-        picking_type = self.env['stock.picking.type']
-        picking_type_id = picking_type.search(
-            [('code', '=', 'internal'), ('warehouse_id', '=', self.warehouse_id.id), ('sequence_code', '=', 'INT')])
-        if len(list(picking_type_id)) > 0:
-            _logger.debug('The stock.picking.type transit was found to generate stock.pickins %s', picking_type_id)
-            return picking_type_id.id
-        else:
-            res = picking_type.create({
-                'name': 'suplir falta de stock',
-                'code': 'internal',
-                'warehouse_id': self.warehouse_id.id,
-                'default_location_src_id': location_id,
-                'default_location_dest_id': dest_location_id,
-                'sequence_code': 'INT-TRANSIT',
-            })
-            _logger.info('The new stock.picking.type transit was creaded %s', res.id)
-            return res.id
