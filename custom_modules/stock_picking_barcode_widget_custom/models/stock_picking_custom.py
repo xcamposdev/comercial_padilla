@@ -1,11 +1,11 @@
 from odoo import api, fields, models
 
 
-class StockPicking_Custom(models.Model):
+class StockPickingCustom(models.Model):
     _inherit = 'stock.picking.type'
 
     def get_action_picking_tree_ready_kanban(self):
-        response = super(StockPicking_Custom, self).get_action_picking_tree_ready_kanban()
+        response = super(StockPickingCustom, self).get_action_picking_tree_ready_kanban()
         is_intersect_context = response.get('context')
         
         if self.id == self.warehouse_id.pick_type_id.id:
