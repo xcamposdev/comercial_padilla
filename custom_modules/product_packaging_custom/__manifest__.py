@@ -10,6 +10,7 @@
         'views/stock_quant.xml',
         'views/assets.xml',
     ],
+    'qweb': ['static/src/xml/qweb_templates.xml'],
     'author': 'Develoop Software',
     'images': ['static/description/icon.png'],
     'maintainer': 'Develoop Software',
