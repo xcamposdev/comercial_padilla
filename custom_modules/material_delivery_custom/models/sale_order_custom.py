@@ -28,7 +28,7 @@ class MaterialDeliverySaleOrder(models.Model):
             requested_qty = move_line.product_uom_qty
             stock_quantity = stock_quantity.search(
                 [('location_id', '=', stock_id), ('product_id', '=', move_line.product_id.id),
-                 ('quantity', '>=', move_line.product_uom_qty)])
+                 ('quantity', '>=', move_line.product_uom_qty)], limit=1)
             if len(list(stock_quantity)) > 0 and \
                     (stock_quantity.quantity - stock_quantity.reserved_quantity) > requested_qty:
                 pass
