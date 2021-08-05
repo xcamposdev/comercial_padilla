@@ -46,8 +46,7 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
             return res;
         },
         _has_origin_picking: async function(id) {
-            var self = this;
-            const response = await self._rpc({
+            const response = await this._rpc({
                     model: 'stock.picking',
                     method: 'has_origin',
                     args: [id],
@@ -55,17 +54,16 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
             return response;
         },
         _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id, owner_id) {
-            var self = this;
             var virtualId = this._getNewVirtualId();
             var currentPage = this.pages[this.currentPageIndex];
             var location_dest_id = currentPage.location_dest_id;
             var location_display_name = currentPage.location_dest_name;
-            if (!self.has_origin && product.x_location != undefined && self.currentState.picking_type_code == "internal") {
+            if (!this.has_origin && product.x_location != undefined && this.currentState.picking_type_code == "internal") {
                 location_dest_id = product.x_location[0];
                 location_display_name = product.x_location[1];
             }
             var newLine = {
-                'picking_id': self.currentState.id,
+                'picking_id': this.currentState.id,
                 'product_id': {
                     'id': product.id,
                     'display_name': product.display_name,
@@ -86,10 +84,10 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
                     'display_name': location_display_name,
                 },
                 'package_id': package_id,
-                'result_package_id':  (product.x_package != undefined && self.currentState.picking_type_code == "internal") ? [product.x_package[0], product.x_package[1]] : result_package_id,
+                'result_package_id':  (product.x_package != undefined && this.currentState.picking_type_code == "internal") ? [product.x_package[0], product.x_package[1]] : result_package_id,
                 'owner_id': owner_id,
                 'state': 'assigned',
-                'reference': self.name,
+                'reference': this.name,
                 'virtual_id': virtualId,
                 'package_size': package_id !== undefined || package_id !== null ? qty_done : false,
                 'packages_count': package_id !== undefined || package_id !== null ? 1 : false,
