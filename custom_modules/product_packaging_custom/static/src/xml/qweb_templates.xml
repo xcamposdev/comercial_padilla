@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="stock_barcode_lines_template">
+    	<t t-jquery="i.fa-truck" t-operation="after">
+    		<t t-if="line.packages_count and line.packages_count > 0">
+				<span class="packages_count" t-esc="line.packages_count"></span>
+			</t>
+    	</t>
+    </t>
+</templates>
