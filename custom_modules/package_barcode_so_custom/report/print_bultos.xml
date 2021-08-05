@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_package_sale_order">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <style>
+                      .border_custom { border:1px solid #666666; }
+                      .margin_left_30 { margin-left:30px; }
+                      .margin_right_30 { margin-right:30px; }
+                    </style>
+               
+                    <t t-set="nro_page" t-value="1"/>
+                    <t t-set="packages" t-value="docs.get_packaging_report_packaging()"/>
+                    <t t-foreach="packages" t-as="o">
+                        <div class="row">
+                            <img class="barcode border_custom margin_right_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package_name'], 220, 200)" style="padding:10px;"/>
+                            <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['sale'], 200, 200)" style="padding:10px;"/>
+                            <img class="barcode border_custom margin_left_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['picking'], 300, 200)" style="padding:10px; "/>
+                        </div>
+                  
+
+                        <table class="table table-sm o_main_table mt32" name="invoice_line_table">
+                            <thead>
+                                <tr>
+                                    <th name="th_product" class="text-left"><span class="o_bold">Producto Contenido</span></th>
+                                    <th name="th_quantity" class="text-right"><span class="o_bold">Cantidad</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="list_iva_tbody">
+                                <t t-foreach="o['lines']" t-as="line">
+                                    <tr>
+                                        <td class="text-left">
+                                            <span t-esc="line['product']"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="line['quantity']"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt32">
+                          <div class="col-5 border_custom" style="width:38%;">
+                            <strong>Dirección entrega</strong>
+                            <div t-esc="o['address']" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone'], 'no_marker': True, 'phone_icons': False}"/>
+                          </div>
+                          <div class="col-1" style="width:5%;"/>
+                            
+                          <div class="col-5 border_custom" style="width:38%;">
+                            <strong>Cliente</strong>
+                            <p class="m-0" t-esc="o['partner']"/>
+                          </div>
+                          <div class="col-1" style="width:5%;"/>
+                          
+                          <div class="col-2 text-center" style="width:14%;">
+                            <h3 class="border_custom" style="position:absolute; bottom:0; padding:10px 5px 10px 5px;">
+                              <t t-esc="nro_page"/> / <t t-esc="len(packages)"/>
+                            </h3>
+                          </div>
+                        </div>
+
+                        <p style="page-break-before:always;"> </p>
+                        <t t-set="nro_page" t-value="nro_page+1"/>
+                    </t>
+                </div> 
+            </t>
+        </t>
+    </template>
+
+</odoo>
