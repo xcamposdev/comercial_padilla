@@ -21,31 +21,37 @@ odoo.define('info_sp_so_mobile_custom.kanban_renderer_mobile_custom_js', functio
             });
         },
         loadOriginSale: function (dbID, data) {
-            if (data != null && data.domain.length == 1 && data.domain[0].length == 3 && data.domain[0][0] == "origin")
+            if (data != null && data.domain.length > 0)// && data.domain[0].length == 3 && data.domain[0][0] == "origin")
             {
-                ajax.jsonRpc('/web/dataset/call_kw', 'call', {
-                    'model': 'stock.picking',
-                    'method': 'get_origin_sale_kanban',
-                    'args': [[],data.domain[0][2]],
-                    'kwargs': {
-                        'context': {},
-                    }
-                }).then(function (data) {
-                    if (data != false)
+                for (let i = 0; i < data.domain.length; i++)
+                {
+                    if (data.domain[i].length == 3 && data.domain[i][0] == "origin")
                     {
-                        var div_content = $(".o_kanban_group.o_current").find("div[data-id='" + dbID + "']");
-                        var content = "<div class='oe_kanban_card o_kanban_record oe_kanban_card_muted'>";
-                        content += "<div><strong>Cliente: </strong>" + data['partner_name'] + "</div>";
-                        if (data['is_tss'] == true) 
-                            content += "<div><strong>TSS: </strong>TSS</div>";
-                        else
-                            content += "<div><strong>TSS: </strong>Comercial Padilla</div>";
-                        content += "<div><strong>Peso: </strong>" + data['weight'] + "</div>";
-                        content += "<div><strong>Número de lineas de la venta: </strong>" + data['number_of_lines'] + "</div>";
-                        content += "</div>"
-                        div_content.prevObject.prepend(content);
+                        ajax.jsonRpc('/web/dataset/call_kw', 'call', {
+                            'model': 'stock.picking',
+                            'method': 'get_origin_sale_kanban',
+                            'args': [[],data.domain[i][2]],
+                            'kwargs': {
+                                'context': {},
+                            }
+                        }).then(function (data) {
+                            if (data != false)
+                            {
+                                var div_content = $(".o_kanban_group.o_current").find("div[data-id='" + dbID + "']");
+                                var content = "<div class='oe_kanban_card o_kanban_record oe_kanban_card_muted'>";
+                                content += "<div><strong>Cliente: </strong>" + data['partner_name'] + "</div>";
+                                if (data['is_tss'] == true) 
+                                    content += "<div><strong>TSS: </strong>TSS</div>";
+                                else
+                                    content += "<div><strong>TSS: </strong>Comercial Padilla</div>";
+                                content += "<div><strong>Peso: </strong>" + data['weight'] + "</div>";
+                                content += "<div><strong>Número de lineas de la venta: </strong>" + data['number_of_lines'] + "</div>";
+                                content += "</div>"
+                                div_content.prevObject.prepend(content);
+                            }
+                        });
                     }
-                });
+                }
             }
         }
     });

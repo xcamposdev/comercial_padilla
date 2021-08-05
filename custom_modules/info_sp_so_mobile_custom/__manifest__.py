@@ -5,7 +5,7 @@
     'author': 'Develoop Software S.A.',
     'category': 'stock_picking',
     'website': 'https://www.develoop.net/',
-    'depends': ['base', 'web', 'stock', 'sale'],
+    'depends': ['base', 'web', 'stock', 'stock_barcode', 'sale'],
     'summary': 'información de venta en stock picking Mobile Custom',
     'description': """
         información de venta en stock picking Mobile Custom
