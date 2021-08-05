@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE xml>
+<odoo>
+
+    <template id="info_sp_so_mobile_custom" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/info_sp_so_mobile_custom/static/src/js/kanban_renderer_mobile_custom.js"></script>
+        </xpath>
+    </template>
+
+</odoo>
