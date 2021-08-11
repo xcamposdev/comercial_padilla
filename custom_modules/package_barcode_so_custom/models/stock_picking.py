@@ -131,7 +131,8 @@ class package_barcode_so_custom_stock_picking(models.Model):
                             'picking_name': record.name,
                         })
                     else:
-                        data_find['weight'] = float(data_find['weight']) + (line.product_id.weight * line.product_uom_qty)
+                        data_find[0]['weight'] = float(data_find[0]['weight']) + (line.product_id.weight * line.product_uom_qty)
+                        #data_find['weight'] = float(data_find['weight']) + (line.product_id.weight * line.product_uom_qty)
 
         return toreturn
 
