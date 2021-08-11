@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <!-- <data noupdate="1"> -->
+    <data>
         <record id="paperformat_bulto" model="report.paperformat">
-            <field name="name">bultos 210 mm x 150 mm (ancho x largo)</field>
+            <field name="name">bultos 152 mm x 102 mm (ancho x largo)</field>
             <field name="default" eval="True" />
             <field name="format">custom</field>
-            <field name="page_height">150</field>
-            <field name="page_width">210</field>
-            <field name="orientation">Portrait</field>
-            <field name="margin_top">10</field>
-            <field name="margin_bottom">10</field>
-            <field name="margin_left">7</field>
-            <field name="margin_right">7</field>
+            <field name="page_height">152</field>
+            <field name="page_width">102</field>
+            <field name="orientation">Landscape</field>
+            <field name="margin_top">5</field>
+            <field name="margin_bottom">5</field>
+            <field name="margin_left">5</field>
+            <field name="margin_right">5</field>
             <field name="header_line" eval="False" />
             <field name="header_spacing">0</field>
             <field name="dpi">90</field>
