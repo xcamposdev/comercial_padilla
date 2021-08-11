@@ -1,73 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="report_package_sale_order">
-        <t t-call="web.html_container">
-            <t t-call="web.basic_layout">
-                <div class="page">
-                    <style>
-                      .border_custom { border:1px solid #666666; }
-                      .margin_left_30 { margin-left:30px; }
-                      .margin_right_30 { margin-right:30px; }
-                    </style>
-               
-                    <t t-set="nro_page" t-value="1"/>
-                    <t t-set="packages" t-value="docs.get_packaging_report_packaging()"/>
-                    <t t-foreach="packages" t-as="o">
-                        <div class="row">
-                            <img class="barcode border_custom margin_right_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package_name'], 220, 200)" style="padding:10px;"/>
-                            <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['sale'], 200, 200)" style="padding:10px;"/>
-                            <img class="barcode border_custom margin_left_30" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['picking'], 300, 200)" style="padding:10px; "/>
-                        </div>
-                  
+  <template id="report_package_sale_order">
+    <t t-call="web.html_container">
+      <t t-call="web.basic_layout">
+        <div class="page">
+            <style>
+              .logo_content { width:120px; }
+              .logo { width:90px; height:60px; display:inline-block; }
+              .border_custom { border:1px solid #666666; padding:10px; }
+              .margin_left_30 { margin-left:30px; }
+              .margin_right_30 { margin-right:30px; }
+            </style>
+        
+            <t t-set="nro_page" t-value="1"/>
+            <t t-set="packages" t-value="docs.get_packaging_report_packaging()"/>
+            <t t-foreach="packages" t-as="o">
 
-                        <table class="table table-sm o_main_table mt32" name="invoice_line_table">
-                            <thead>
-                                <tr>
-                                    <th name="th_product" class="text-left"><span class="o_bold">Producto Contenido</span></th>
-                                    <th name="th_quantity" class="text-right"><span class="o_bold">Cantidad</span></th>
-                                </tr>
-                            </thead>
-                            <tbody class="list_iva_tbody">
-                                <t t-foreach="o['lines']" t-as="line">
-                                    <tr>
-                                        <td class="text-left">
-                                            <span t-esc="line['product']"/>
-                                        </td>
-                                        <td class="text-right">
-                                            <span t-esc="line['quantity']"/>
-                                        </td>
-                                    </tr>
-                                </t>
-                            </tbody>
-                        </table>
+                <div class="row">
+                  <div class="col-2 logo_content">
+                    <img t-if="o['company_id']" t-att-src="'/web/content/res.company/%s/logo' % (o['company_id'])" class="logo"/>
+                  </div>
+                  <div class="col-7">
+                    <p class="m-0" t-esc="o['company_name']"/>
+                    <p class="m-0" t-esc="o['company_vat']"/>
+                  </div>
+                  <div class="col-3 text-right">
+                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                  </div>
+                </div>
+                
+                <div class="row mt16">
+                  <div class="col-6">
+                    <strong class="font-weight-bold">REMITENTE</strong>
+                    <p class="m-0" t-esc="o['company']" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/>
+                  </div>
+                  <div class="col-6">
+                    <strong class="font-weight-bold">DESTINATARIO</strong>
+                    <!-- <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address', 'phone'], 'no_marker': True, 'phone_icons': True}"/> -->
+                    <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/>
+                  </div>
+                </div>
 
-                        <div class="row mt32">
-                          <div class="col-5 border_custom" style="width:38%;">
-                            <strong>Dirección entrega</strong>
-                            <div t-esc="o['address']" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone'], 'no_marker': True, 'phone_icons': False}"/>
-                          </div>
-                          <div class="col-1" style="width:5%;"/>
-                            
-                          <div class="col-5 border_custom" style="width:38%;">
-                            <strong>Cliente</strong>
-                            <p class="m-0" t-esc="o['partner']"/>
-                          </div>
-                          <div class="col-1" style="width:5%;"/>
-                          
-                          <div class="col-2 text-center" style="width:14%;">
-                            <h3 class="border_custom" style="position:absolute; bottom:0; padding:10px 5px 10px 5px;">
-                              <t t-esc="nro_page"/> / <t t-esc="len(packages)"/>
-                            </h3>
-                          </div>
-                        </div>
+                <div class="row mt16">
+                  <div class="col-12">
+                    <strong>Método:</strong>
+                    <span t-esc="o['carrier_name']"/>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <strong>Peso:</strong>
+                    <span t-esc="o['weight']"/> <span t-esc="o['weight_uom_name']" />
+                  </div>
+                </div>
+                <div class="row mt8">
+                  <div class="col-6">
+                    <span class="border_custom text-center" >
+                      <t t-esc="nro_page"/> / <t t-esc="len(packages)"/>
+                    </span>
+                  </div>
+                </div>
 
-                        <p style="page-break-before:always;"> </p>
-                        <t t-set="nro_page" t-value="nro_page+1"/>
-                    </t>
-                </div> 
+                <div class="row mt32">
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package_name'], 180, 80)" />
+                  </div>
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['sale_name'], 180, 80)" />
+                  </div>
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['picking_name'], 180, 80)" />
+                  </div>
+                </div>
+
+                <p style="page-break-before:always;"> </p>
+                <t t-set="nro_page" t-value="nro_page+1"/>
             </t>
-        </t>
-    </template>
+        </div>
+      </t>
+    </t>
+  </template>
 
 </odoo>

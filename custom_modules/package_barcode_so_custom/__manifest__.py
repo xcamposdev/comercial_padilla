@@ -9,7 +9,7 @@
     'description': """
         - Empaquetar bultos pedido venta
         """,
-    'depends': ['base', 'web', 'sale', 'stock_barcode', 'stock_move_barcode_track'],
+    'depends': ['base', 'web', 'sale', 'stock_barcode'],
     'data': [
         'data/paperformat.xml',
         'report/menu.xml',

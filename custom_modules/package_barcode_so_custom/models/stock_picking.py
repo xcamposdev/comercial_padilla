@@ -104,24 +104,34 @@ class package_barcode_so_custom_stock_picking(models.Model):
 
     def get_packaging_report_packaging(self):
         toreturn = list()
+
+        # Get Company Logo
+        company = self.env['res.company'].search([], order="id asc")
+
         for record in self:
             for line in record.move_line_ids_without_package or []:
                 if line.result_package_id:
                     data_find = list(data for data in toreturn if data['package_id'] == line.result_package_id.id)
-                    if data_find:
-                        data_find[0]['lines'].append({ 'product': line.product_id.display_name, 'quantity': line.qty_done })
-                    else:
-                        line_to_add = list()
-                        line_to_add.append({ 'product': line.product_id.display_name, 'quantity': line.qty_done })
-                        toreturn.append({ 
+                    if not data_find:
+                        toreturn.append({
+                            'company_id': company[1].id if record.partner_id.x_is_tss else company[0].id,
+                            'company_name': company[1].name if record.partner_id.x_is_tss else company[0].name,
+                            'company_vat': company[1].vat if record.partner_id.x_is_tss else company[0].vat,
+
+                            'company': company[1].partner_id if record.partner_id.x_is_tss else company[0].partner_id,
+                            'partner': record.partner_id,
+
+                            'carrier_name': record.carrier_id.name,
+                            'weight': float(line.product_id.weight * line.product_uom_qty),
+                            'weight_uom_name': line.product_id.weight_uom_name,
+
                             'package_id': line.result_package_id.id,
                             'package_name': line.result_package_id.name,
-                            'sale': record.sale_id.name if record.sale_id else '',
-                            'picking': record.name,
-                            'address': record.partner_id,
-                            'partner': record.partner_id.display_name,
-                            'lines': line_to_add
+                            'sale_name': record.sale_id.name if record.sale_id else '',
+                            'picking_name': record.name,
                         })
+                    else:
+                        data_find['weight'] = float(data_find['weight']) + (line.product_id.weight * line.product_uom_qty)
 
         return toreturn
 
