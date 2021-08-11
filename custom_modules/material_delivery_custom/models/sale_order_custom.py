@@ -23,53 +23,56 @@ class MaterialDeliverySaleOrder(models.Model):
         stock_quantity = self.env['stock.quant']
         for move_line in self.order_line:
             requested_qty = move_line.product_uom_qty
-            stock_quantity = stock_quantity.search(
-                [('location_id', '=', stock_id), ('product_id', '=', move_line.product_id.id),
-                 ('quantity', '>=', move_line.product_uom_qty)], limit=1)
-            if len(list(stock_quantity)) > 0 and \
-                    (stock_quantity.quantity - stock_quantity.reserved_quantity) > requested_qty:
-                pass
-            else:
-                # review if the location_id has to be always field usage = internal
-                # review if the location_id isn't related to the warehouse target
-                packaging_ids = self.env['product.packaging'].search(
-                    [('product_id', '=', move_line.product_id.id)], order='qty desc')
-                move_ref = self.env['stock.move'].search([
-                    ('product_id', '=', move_line.move_ids[0].product_id.id),
-                    ('origin', '=', move_line.move_ids[0].origin)], limit=1)
-                for pack in packaging_ids:
-                    if not pack.x_location:
-                        raise UserError('El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
-                            pack.name, move_line.product_id.name))
-                    stock_quantity = stock_quantity.search(
-                        [('location_id', '=', pack.x_location.id), ('product_id', '=', move_line.product_id.id),
-                         ('package_id', '=', pack.x_package.id),
-                         ('quantity', '>=', pack.qty)], limit=1)
-                    location_id = stock_quantity.location_id.id
-                    packs_requested = MaterialDeliverySaleOrder._get_available_per_pack(
-                        requested_qty, stock_quantity.quantity - stock_quantity.reserved_quantity, pack.qty)
-                    if packs_requested != 0:
-                        picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
-                        self._generate_move_lines(move_ref, picking_id, stock_quantity,
-                                                  packs_requested, location_id, stock_id, pack.x_package.id)
-                        picking_id.action_confirm()
-                        requested_qty -= packs_requested
+            if move_line.product_id.type == 'product' and requested_qty > 0:
+                stock_quantity = stock_quantity.search(
+                    [('location_id', '=', stock_id), ('product_id', '=', move_line.product_id.id),
+                     ('quantity', '>=', move_line.product_uom_qty)], limit=1)
+                if len(list(stock_quantity)) > 0 and \
+                        (stock_quantity.quantity - stock_quantity.reserved_quantity) > requested_qty:
+                    pass
+                else:
+                    # review if the location_id has to be always field usage = internal
+                    # review if the location_id isn't related to the warehouse target
+                    packaging_ids = self.env['product.packaging'].search(
+                        [('product_id', '=', move_line.product_id.id)], order='qty desc')
+                    move_ref = self.env['stock.move'].search([
+                        ('product_id', '=', move_line.move_ids[0].product_id.id),
+                        ('origin', '=', move_line.move_ids[0].origin)], limit=1)
+                    for pack in packaging_ids:
+                        if not pack.x_location:
+                            raise UserError('El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
+                                pack.name, move_line.product_id.name))
+                        stock_quants = stock_quantity.search(
+                            [('location_id', '=', pack.x_location.id), ('product_id', '=', move_line.product_id.id),
+                             ('package_id', '=', pack.x_package.id),
+                             ('quantity', '>=', pack.qty)])
+                        for stock_quant in stock_quants:
+                            location_id = stock_quant.location_id.id
+                            packs_requested = MaterialDeliverySaleOrder._get_available_per_pack(
+                                requested_qty, stock_quant.quantity - stock_quant.reserved_quantity, pack.qty)
+                            if packs_requested > 0:
+                                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
+                                self._generate_move_lines(move_ref, picking_id, stock_quant,
+                                                          packs_requested, location_id, stock_id, pack.x_package.id)
+                                picking_id.action_confirm()
+                                picking_id.action_assign()
+                                requested_qty -= packs_requested
 
-                if requested_qty > 0:
-                    stock_quantity = stock_quantity.search(
-                        [('location_id', 'not in', [
-                            self.warehouse_id.view_location_id.id,
-                            self.warehouse_id.lot_stock_id.id,
-                            self.warehouse_id.wh_input_stock_loc_id.id,
-                            self.warehouse_id.wh_qc_stock_loc_id.id,
-                            self.warehouse_id.wh_pack_stock_loc_id.id,
-                            self.warehouse_id.wh_output_stock_loc_id.id,
-                        ]), ('product_id', '=', move_line.product_id.id),
-                         ('quantity', '>', 0)])
-                    requested_qty = self._generate_extra_moves_by_location(stock_quantity, move_ref, requested_qty,
-                                                                           stock_id)
                     if requested_qty > 0:
-                        MaterialDeliverySaleOrder.execute_cron = True
+                        stock_quantity = stock_quantity.search(
+                            [('location_id', 'not in', [
+                                self.warehouse_id.view_location_id.id,
+                                self.warehouse_id.lot_stock_id.id,
+                                self.warehouse_id.wh_input_stock_loc_id.id,
+                                self.warehouse_id.wh_qc_stock_loc_id.id,
+                                self.warehouse_id.wh_pack_stock_loc_id.id,
+                                self.warehouse_id.wh_output_stock_loc_id.id,
+                            ]), ('product_id', '=', move_line.product_id.id),
+                             ('quantity', '>', 0)])
+                        requested_qty = self._generate_extra_moves_by_location(stock_quantity, move_ref, requested_qty,
+                                                                               stock_id)
+                        if requested_qty > 0:
+                            MaterialDeliverySaleOrder.execute_cron = True
 
         if MaterialDeliverySaleOrder.execute_cron:
             ssc = self.env['stock.scheduler.compute']
@@ -103,11 +106,13 @@ class MaterialDeliverySaleOrder(models.Model):
             if available_qty >= requested_qty:
                 self._generate_move_lines(move_ref, picking_id, squant, requested_qty, location_id, stock_id)
                 picking_id.action_confirm()
+                picking_id.action_assign()
                 requested_qty = 0
                 break
             else:
                 self._generate_move_lines(move_ref, picking_id, squant, available_qty, location_id, stock_id)
                 picking_id.action_confirm()
+                picking_id.action_assign()
                 requested_qty -= available_qty
         return requested_qty
 
