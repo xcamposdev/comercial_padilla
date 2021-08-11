@@ -107,11 +107,20 @@ odoo.define('product_packaging_custom.picking_client_action_custom_js', function
                     if (this.actionParams.model === 'stock.picking') {
                         line.qty_done += params.product.qty || 1;
 
-                        if (line.package_size) {
+                        if (line.package_size || params.product.x_package_size != undefined) {
+                            if(line.package_size == undefined) {
+                                line.package_size = params.product.x_package_size;
+                            }
                             line.packages_count = line.qty_done/line.package_size;
-                            var $line = this.$("[data-id='" + line.virtual_id + "']");
+                            var $line = null;
+                            if (line.id == undefined) {
+                                $line = this.$("[data-id='" + line.virtual_id + "']");
+                            } else {
+                                $line = this.$("[data-id='" + line.id + "']");
+                            }
                             var incrementClass = '.packages_count';
 
+                            // increment quantity and avoid insignificant digits
                             $line.find(incrementClass).text(line.packages_count);
                         }
                         if (params.package_id) {
