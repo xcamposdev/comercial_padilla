@@ -113,6 +113,7 @@ class package_barcode_so_custom_stock_picking(models.Model):
                 if line.result_package_id:
                     data_find = list(data for data in toreturn if data['package_id'] == line.result_package_id.id)
                     if not data_find:
+                        qty = line.qty_done if line.state == 'done' else line.product_uom_qty
                         toreturn.append({
                             'company_id': company[1].id if record.partner_id.x_is_tss else company[0].id,
                             'company_name': company[1].name if record.partner_id.x_is_tss else company[0].name,
@@ -122,7 +123,7 @@ class package_barcode_so_custom_stock_picking(models.Model):
                             'partner': record.partner_id,
 
                             'carrier_name': record.carrier_id.name,
-                            'weight': float(line.product_id.weight * line.product_uom_qty),
+                            'weight': float(line.product_id.weight * qty),
                             'weight_uom_name': line.product_id.weight_uom_name,
 
                             'package_id': line.result_package_id.id,
@@ -131,8 +132,7 @@ class package_barcode_so_custom_stock_picking(models.Model):
                             'picking_name': record.name,
                         })
                     else:
-                        data_find[0]['weight'] = float(data_find[0]['weight']) + (line.product_id.weight * line.product_uom_qty)
-                        #data_find['weight'] = float(data_find['weight']) + (line.product_id.weight * line.product_uom_qty)
+                        data_find[0]['weight'] = float(data_find[0]['weight']) + (line.product_id.weight * qty)
 
         return toreturn
 
