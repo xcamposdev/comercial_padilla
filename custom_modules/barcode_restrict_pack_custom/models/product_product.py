@@ -36,10 +36,11 @@ class ProductCustom(models.Model):
         products_by_id = {product['id']: product for product in products}
         for packaging in packagings:
             
-            packaging['packaging_id'] = packaging['id'];
+            packaging['packaging_id'] = packaging['id']
             if packaging.get('x_location', False):
                 stock_location = self.env['stock.location'].search([('id','=',packaging['x_location'][0])])
                 packaging['x_location_barcode'] = stock_location.barcode
+                packaging['x_package_size'] = packaging['qty']
 
             if products_by_id.get(packaging['product_id']):
                 product = products_by_id[packaging['product_id']]
