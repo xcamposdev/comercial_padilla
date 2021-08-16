@@ -33,13 +33,17 @@
                 
                 <div class="row mt8 small">
                   <div class="col-6">
-                    <strong class="font-weight-bold">REMITENTE</strong>
+                    <t t-if="is_tss">
+                      <span>The Smoker Shop</span>
+                    </t>
+                    <t t-else="">
+                      <span>Comercial Padilla</span>
+                    </t>
                     <p class="m-0" t-esc="o['company']" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/>
                   </div>
                   <div class="col-6">
-                    <strong class="font-weight-bold">DESTINATARIO</strong>
                     <!-- <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address', 'phone'], 'no_marker': True, 'phone_icons': True}"/> -->
-                    <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/>
+                    <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address','name'], 'no_marker': True}"/>
                   </div>
                 </div>
 
