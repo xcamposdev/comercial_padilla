@@ -115,6 +115,7 @@ class package_barcode_so_custom_stock_picking(models.Model):
                     if not data_find:
                         qty = line.qty_done if line.state == 'done' else line.product_uom_qty
                         toreturn.append({
+                            'is_tss': record.partner_id.x_is_tss,
                             'company_id': company[1].id if record.partner_id.x_is_tss else company[0].id,
                             'company_name': company[1].name if record.partner_id.x_is_tss else company[0].name,
                             'company_vat': company[1].vat if record.partner_id.x_is_tss else company[0].vat,
