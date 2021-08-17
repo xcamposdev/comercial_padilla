@@ -1,12 +1,10 @@
 from itertools import groupby
 import logging
 import threading
-from odoo import models, api
+from odoo import fields, models, api
 from odoo.exceptions import UserError
 
-
 _logger = logging.getLogger(__name__)
-
 
 class SaleOrderStockbacode(models.Model):
     
@@ -17,7 +15,8 @@ class SaleOrderStockbacode(models.Model):
     x_item_count = fields.Integer(string='Nro of items', compute='_compute_number_items')
     x_unit_total = fields.Integer(string='Nro of units', compute='_compute_number_units')
     x_weight_total = fields.Float(string="Weight total", compute="_compute_weight_total")
-    
+    x_weight_total_uom = fields.Char(string="Weight Uom", compute="_compute_weight_total_uom")
+
     def _compute_get_partner_x_is_tss(self):
         for record in self:
             record.x_partner_id_x_is_tss = record.partner_id.x_is_tss
@@ -26,7 +25,7 @@ class SaleOrderStockbacode(models.Model):
     def _compute_number_picks(self):
         for order in self:
             if order.warehouse_id:
-                picks = list(data for data in order.picking_ids if data.picking_type_id == order.warehouse_id.pick_type_id)
+                picks = list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id))
                 order.x_picking_count = len(picks)
 
     def _compute_number_items(self):
@@ -38,8 +37,17 @@ class SaleOrderStockbacode(models.Model):
             order.x_unit_total = sum(data.product_uom_qty for data in order.order_line)
 
     def _compute_weight_total(self):
-         for order in self:
+        for order in self:
             order.x_weight_total = sum(data.product_id.weight * data.product_uom_qty if data.product_id else 0 for data in order.order_line)
+
+    def _compute_weight_total_uom(self):
+        for order in self:
+            weight = ""
+            for data in order.order_line:
+                if data.product_id:
+                    weight = data.product_id.weight_uom_name
+                    break
+            order.x_weight_total_uom = weight
 
     @staticmethod
     def group_by_field(data, group_by):

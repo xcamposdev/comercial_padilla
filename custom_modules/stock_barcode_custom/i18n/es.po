@@ -877,30 +877,30 @@ msgstr "Pedido de Venta"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Client:"
-msgstr "Cliente:"
+msgid "<strong>Client:</strong>"
+msgstr "<strong>Cliente:</strong>"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Delivery date:"
-msgstr "Fecha entrega:"
+msgid "<strong>Delivery date:</strong>"
+msgstr "<strong>Fecha entrega:</strong>"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Nro of picks:"
-msgstr "Nro de picks:"
+msgid "<strong>Nro of picks:</strong>"
+msgstr "<strong>Nro de picks:</strong>"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Nro of items:"
-msgstr "Nro de items:"
+msgid "<strong>Nro of items:</strong>"
+msgstr "<strong>Nro de items:</strong>"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Nro of units:"
-msgstr "Nro de unidades:"
+msgid "<strong>Nro of units:</strong>"
+msgstr "<strong>Nro de unidades:</strong>"
 
 #. module: stock_barcode_custom
 #: model_terms:ir.ui.view,arch_db:stock_barcode_custom.sale_order_kanban
-msgid "Weight total:"
-msgstr "Peso total:"
+msgid "<strong>Weight total:</strong>"
+msgstr "<strong>Peso total:</strong>"
