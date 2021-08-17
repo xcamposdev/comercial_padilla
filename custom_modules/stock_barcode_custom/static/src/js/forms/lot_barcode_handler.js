@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.LotBarcodeHandler', function (require) {
+odoo.define('stock_barcode_custom.LotBarcodeHandler', function (require) {
 "use strict";
 
 var field_registry = require('web.field_registry');
@@ -14,7 +14,7 @@ var LotBarcodeHandler = AbstractField.extend({
             quantity: 'qty_done',
             setQuantityWithKeypress: true,
             commands: {
-                'O-CMD.MAIN-MENU': _.bind(this.do_action, this, 'stock_barcode.stock_barcode_action_main_menu', {clear_breadcrumbs: true}),
+                'O-CMD.MAIN-MENU': _.bind(this.do_action, this, 'stock_barcode_custom.stock_barcode_action_main_menu', {clear_breadcrumbs: true}),
                 barcode: '_barcodeAddX2MQuantity',
             }
         });

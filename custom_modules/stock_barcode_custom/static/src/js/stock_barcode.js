@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.MainMenu', function (require) {
+odoo.define('stock_barcode_custom.MainMenu', function (require) {
 "use strict";
 
 var AbstractAction = require('web.AbstractAction');
@@ -13,10 +13,13 @@ var MainMenu = AbstractAction.extend({
 
     events: {
         "click .button_operations": function(){
-            this.do_action('stock_barcode.stock_picking_type_action_kanban');
+            this.do_action('stock_barcode_custom.stock_picking_type_action_kanban');
         },
         "click .button_inventory": function(){
             this.open_inventory();
+        },
+        "click .button_sale": function(){
+            this.do_action('stock_barcode_custom.sale_order_action_kanban');
         },
         "click .o_stock_barcode_menu": function(){
             this.trigger_up('toggle_fullscreen');
@@ -64,7 +67,7 @@ var MainMenu = AbstractAction.extend({
                 size: 'medium',
                 buttons: [
                     { text: _t("Remove it"), close: true, classes: 'btn-primary', click: function() {
-                        Session.rpc('/stock_barcode/rid_of_message_demo_barcodes');
+                        Session.rpc('/stock_barcode_custom/rid_of_message_demo_barcodes');
                     }},
                     { text: _t("Leave it"), close: true }
                 ],
@@ -78,7 +81,7 @@ var MainMenu = AbstractAction.extend({
         if (!$.contains(document, this.el)) {
             return;
         }
-        Session.rpc('/stock_barcode/scan_from_main_menu', {
+        Session.rpc('/stock_barcode_custom/scan_from_main_menu', {
             barcode: barcode,
         }).then(function(result) {
             if (result.action) {

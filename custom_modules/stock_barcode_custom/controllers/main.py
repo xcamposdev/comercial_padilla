@@ -4,7 +4,7 @@ from odoo.http import request
 
 class StockBarcodeController(http.Controller):
 
-    @http.route('/stock_barcode/scan_from_main_menu', type='json', auth='user')
+    @http.route('/stock_barcode_custom/scan_from_main_menu', type='json', auth='user')
     def main_menu(self, barcode, **kw):
         """ Receive a barcode scanned from the main menu and return the appropriate
             action (open an existing / new picking) or warning.
@@ -100,7 +100,7 @@ class StockBarcodeController(http.Controller):
         return the action to display the picking. We choose between the traditionnal
         form view and the new client action
         """
-        use_form_handler = request.env['ir.config_parameter'].sudo().get_param('stock_barcode.use_form_handler')
+        use_form_handler = request.env['ir.config_parameter'].sudo().get_param('stock_barcode_custom.use_form_handler')
         if use_form_handler:
             view_id = request.env.ref('stock.view_picking_form').id
             return {
@@ -115,7 +115,7 @@ class StockBarcodeController(http.Controller):
                 }
             }
         else:
-            action = request.env.ref('stock_barcode.stock_barcode_picking_client_action').read()[0]
+            action = request.env.ref('stock_barcode_custom.stock_barcode_picking_client_action').read()[0]
             params = {
                 'model': 'stock.picking',
                 'picking_id': picking_id,
@@ -125,13 +125,13 @@ class StockBarcodeController(http.Controller):
             action = {'action': action}
             return action
 
-    @http.route('/stock_barcode/rid_of_message_demo_barcodes', type='json', auth='user')
+    @http.route('/stock_barcode_custom/rid_of_message_demo_barcodes', type='json', auth='user')
     def rid_of_message_demo_barcodes(self, **kw):
         """ Edit the main_menu client action so that it doesn't display the 'print demo barcodes sheet' message """
-        action = request.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action = request.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         action and action.sudo().write({'params': {'message_demo_barcodes': False}})
 
-    @http.route('/stock_barcode/get_set_barcode_view_state', type='json', auth='user')
+    @http.route('/stock_barcode_custom/get_set_barcode_view_state', type='json', auth='user')
     def get_set_barcode_view_state(self, model_name, record_id, mode, write_field=None, write_vals=None):
         if mode != 'read':
             request.env[model_name].browse(record_id).write({write_field: write_vals})

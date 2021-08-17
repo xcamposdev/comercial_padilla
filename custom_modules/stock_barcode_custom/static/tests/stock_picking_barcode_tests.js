@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.stock_picking_barcode_tests', function (require) {
+odoo.define('stock_barcode_custom.stock_picking_barcode_tests', function (require) {
 "use strict";
 
 var testUtils = require('web.test_utils');
@@ -30,7 +30,7 @@ QUnit.module('Barcode', {
             }],
         };
         this.mockRPC = function (route, args) {
-            if (route === '/stock_barcode/get_set_barcode_view_state') {
+            if (route === '/stock_barcode_custom/get_set_barcode_view_state') {
                 return Promise.resolve(self.clientData.currentState);
             } else if (args.method === "get_all_products_by_barcode") {
                 return Promise.resolve({});

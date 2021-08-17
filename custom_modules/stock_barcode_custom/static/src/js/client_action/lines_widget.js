@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.LinesWidget', function (require) {
+odoo.define('stock_barcode_custom.LinesWidget', function (require) {
 'use strict';
 
 var core = require('web.core');

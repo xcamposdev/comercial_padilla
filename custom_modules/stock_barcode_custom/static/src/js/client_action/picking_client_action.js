@@ -1,9 +1,9 @@
-odoo.define('stock_barcode.picking_client_action', function (require) {
+odoo.define('stock_barcode_custom.picking_client_action', function (require) {
 'use strict';
 
 var core = require('web.core');
-var ClientAction = require('stock_barcode.ClientAction');
-var ViewsWidget = require('stock_barcode.ViewsWidget');
+var ClientAction = require('stock_barcode_custom.ClientAction');
+var ViewsWidget = require('stock_barcode_custom.ViewsWidget');
 
 var _t = core._t;
 
@@ -296,7 +296,7 @@ var PickingClientAction = ClientAction.extend({
                 'write_field': 'move_line_ids',
             };
             return this._rpc({
-                'route': '/stock_barcode/get_set_barcode_view_state',
+                'route': '/stock_barcode_custom/get_set_barcode_view_state',
                 'params': params,
             });
         } else {
@@ -317,7 +317,7 @@ var PickingClientAction = ClientAction.extend({
             self.ViewsWidget = new ViewsWidget(
                 self,
                 'stock.picking',
-                'stock_barcode.stock_picking_barcode',
+                'stock_barcode_custom.stock_picking_barcode',
                 {},
                 {currentId: self.currentState.id},
                 'readonly'
@@ -407,7 +407,7 @@ var PickingClientAction = ClientAction.extend({
                         domain: [['package_id', '=', package_id]],
                     },
                 };
-                self.ViewsWidget = new ViewsWidget(self, 'stock.quant', 'stock_barcode.stock_quant_barcode_kanban', {}, params, false, 'kanban');
+                self.ViewsWidget = new ViewsWidget(self, 'stock.quant', 'stock_barcode_custom.stock_quant_barcode_kanban', {}, params, false, 'kanban');
                 return self.ViewsWidget.appendTo(self.$('.o_content'));
             });
         });

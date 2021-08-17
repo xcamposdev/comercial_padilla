@@ -1,9 +1,9 @@
-odoo.define('stock_barcode.inventory_client_action', function (require) {
+odoo.define('stock_barcode_custom.inventory_client_action', function (require) {
 'use strict';
 
 var core = require('web.core');
-var ClientAction = require('stock_barcode.ClientAction');
-var ViewsWidget = require('stock_barcode.ViewsWidget');
+var ClientAction = require('stock_barcode_custom.ClientAction');
+var ViewsWidget = require('stock_barcode_custom.ViewsWidget');
 
 var _t = core._t;
 
@@ -164,7 +164,7 @@ var InventoryClientAction = ClientAction.extend({
             };
 
             return this._rpc({
-                'route': '/stock_barcode/get_set_barcode_view_state',
+                'route': '/stock_barcode_custom/get_set_barcode_view_state',
                 'params': params,
             });
         } else {
@@ -185,7 +185,7 @@ var InventoryClientAction = ClientAction.extend({
             self.ViewsWidget = new ViewsWidget(
                 self,
                 'stock.inventory',
-                'stock_barcode.stock_inventory_barcode2',
+                'stock_barcode_custom.stock_inventory_barcode2',
                 {},
                 {currentId :self.currentState.id},
                 'readonly'

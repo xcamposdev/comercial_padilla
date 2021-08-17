@@ -99,7 +99,7 @@ class StockInventory(models.Model):
         else:
             raise UserError(_('You must define a warehouse for the company: %s.') % (company_user.name,))
 
-        action = self.env.ref('stock_barcode.stock_barcode_inventory_client_action').read()[0]
+        action = self.env.ref('stock_barcode_custom.stock_barcode_inventory_client_action').read()[0]
         if self.env.ref('stock.warehouse0', raise_if_not_found=False):
             new_inv = self.env['stock.inventory'].create({
                 'start_empty': True,

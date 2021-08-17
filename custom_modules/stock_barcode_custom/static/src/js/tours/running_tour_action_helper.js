@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.RunningTourActionHelper', function(require) {
+odoo.define('stock_barcode_custom.RunningTourActionHelper', function(require) {
 "use strict";
 
 var RunningTourActionHelper = require('web_tour.RunningTourActionHelper');

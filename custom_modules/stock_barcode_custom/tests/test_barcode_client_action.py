@@ -892,7 +892,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         grp_pack = self.env.ref('stock.group_tracking_lot')
         self.env.user.write({'groups_id': [(4, grp_pack.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         # set sequence packages to 1000 to find it easily in the tour
@@ -918,7 +918,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         grp_pack = self.env.ref('stock.group_tracking_lot')
         self.env.user.write({'groups_id': [(4, grp_pack.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         # Create a pack and 2 quants in this pack
@@ -970,7 +970,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
         self.picking_type_internal.active = True
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         # Create a pack and 2 quants in this pack
@@ -1100,7 +1100,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_reload_flow', login='admin', timeout=180)
@@ -1131,7 +1131,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
         self.env.user.write({'groups_id': [(4, grp_lot.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_receipt_duplicate_serial_number', login='admin', timeout=180)
@@ -1337,7 +1337,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         - Validate
         """
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_inventory_adjustment', login='admin', timeout=180)
@@ -1361,7 +1361,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_inventory_adjustment_mutli_location', login='admin', timeout=180)
@@ -1397,7 +1397,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         grp_lot = self.env.ref('stock.group_production_lot')
         self.env.user.write({'groups_id': [(4, grp_lot.id, 0)]})
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_inventory_adjustment_tracked_product', login='admin', timeout=180)
@@ -1428,7 +1428,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
             'barcode': '2145631000000',
         })
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, 'test_inventory_nomenclature', login='admin', timeout=180)
@@ -1453,7 +1453,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 7, package_id=pack)
         self.env['stock.quant']._update_available_quantity(self.product2, self.stock_location, 3, package_id=pack)
 
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        action_id = self.env.ref('stock_barcode_custom.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
         self.start_tour(url, "test_inventory_package", login="admin", timeout=180)

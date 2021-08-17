@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.HeaderWidget', function (require) {
+odoo.define('stock_barcode_custom.HeaderWidget', function (require) {
 'use strict';
 
 var Widget = require('web.Widget');

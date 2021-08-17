@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.ClientAction', function (require) {
+odoo.define('stock_barcode_custom.ClientAction', function (require) {
 'use strict';
 
 var concurrency = require('web.concurrency');
@@ -6,10 +6,10 @@ var core = require('web.core');
 var AbstractAction = require('web.AbstractAction');
 var BarcodeParser = require('barcodes.BarcodeParser');
 
-var ViewsWidget = require('stock_barcode.ViewsWidget');
-var HeaderWidget = require('stock_barcode.HeaderWidget');
-var LinesWidget = require('stock_barcode.LinesWidget');
-var SettingsWidget = require('stock_barcode.SettingsWidget');
+var ViewsWidget = require('stock_barcode_custom.ViewsWidget');
+var HeaderWidget = require('stock_barcode_custom.HeaderWidget');
+var LinesWidget = require('stock_barcode_custom.LinesWidget');
+var SettingsWidget = require('stock_barcode_custom.SettingsWidget');
 var utils = require('web.utils');
 
 var _t = core._t;
@@ -141,7 +141,7 @@ var ClientAction = AbstractAction.extend({
             def = Promise.resolve(state);
         } else {
             def = this._rpc({
-                'route': '/stock_barcode/get_set_barcode_view_state',
+                'route': '/stock_barcode_custom/get_set_barcode_view_state',
                 'params': {
                     'record_id': recordId,
                     'mode': 'read',
@@ -1540,7 +1540,7 @@ var ClientAction = AbstractAction.extend({
                     self.ViewsWidget = new ViewsWidget(
                         self,
                         'stock.move.line',
-                        'stock_barcode.stock_move_line_product_selector',
+                        'stock_barcode_custom.stock_move_line_product_selector',
                         {
                             'default_picking_id': self.currentState.id,
                             'default_company_id': default_company_id,
@@ -1554,7 +1554,7 @@ var ClientAction = AbstractAction.extend({
                     self.ViewsWidget = new ViewsWidget(
                         self,
                         'stock.inventory.line',
-                        'stock_barcode.stock_inventory_line_barcode',
+                        'stock_barcode_custom.stock_inventory_line_barcode',
                         {
                             'default_company_id': default_company_id,
                             'default_inventory_id': self.currentState.id,
@@ -1606,7 +1606,7 @@ var ClientAction = AbstractAction.extend({
                     self.ViewsWidget = new ViewsWidget(
                         self,
                         'stock.move.line',
-                        'stock_barcode.stock_move_line_product_selector',
+                        'stock_barcode_custom.stock_move_line_product_selector',
                         {},
                         {currentId: id}
                     );
@@ -1614,7 +1614,7 @@ var ClientAction = AbstractAction.extend({
                     self.ViewsWidget = new ViewsWidget(
                         self,
                         'stock.inventory.line',
-                        'stock_barcode.stock_inventory_line_barcode',
+                        'stock_barcode_custom.stock_inventory_line_barcode',
                         {},
                         {currentId: id}
                     );
@@ -1734,7 +1734,7 @@ var ClientAction = AbstractAction.extend({
     _onMainMenu: function () {
         var self = this;
         self._save().then(function () {
-            self.do_action('stock_barcode.stock_barcode_action_main_menu', {
+            self.do_action('stock_barcode_custom.stock_barcode_action_main_menu', {
                 clear_breadcrumbs: true,
             });
         });

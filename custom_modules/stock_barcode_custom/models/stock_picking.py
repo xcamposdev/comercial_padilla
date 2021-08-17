@@ -120,7 +120,7 @@ class StockPicking(models.Model):
             serial=self.product_id.tracking == 'serial',
             default_product_id=product_id.id,
             candidates=candidates.ids)
-        view_id = self.env.ref('stock_barcode.view_barcode_lot_form').id
+        view_id = self.env.ref('stock_barcode_custom.view_barcode_lot_form').id
         return {
             'name': _('Lot/Serial Number Details'),
             'type': 'ir.actions.act_window',
@@ -345,7 +345,7 @@ class StockPicking(models.Model):
         from a button on the kanban view
         """
         self.ensure_one()
-        use_form_handler = self.env['ir.config_parameter'].sudo().get_param('stock_barcode.use_form_handler')
+        use_form_handler = self.env['ir.config_parameter'].sudo().get_param('stock_barcode_custom.use_form_handler')
         if use_form_handler:
             view_id = self.env.ref('stock.view_picking_form').id
             return {
@@ -357,7 +357,7 @@ class StockPicking(models.Model):
                 'res_id': self.id,
             }
         else:
-            action = self.env.ref('stock_barcode.stock_barcode_picking_client_action').read()[0]
+            action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action').read()[0]
             params = {
                 'model': 'stock.picking',
                 'picking_id': self.id,
@@ -371,4 +371,4 @@ class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 
     def get_action_picking_tree_ready_kanban(self):
-        return self._get_action('stock_barcode.stock_picking_action_kanban')
+        return self._get_action('stock_barcode_custom.stock_picking_action_kanban')

@@ -19,20 +19,20 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#. module: stock_barcode
-#: model:ir.model.fields,field_description:stock_barcode.field_stock_barcode_lot__display_name
-#: model:ir.model.fields,field_description:stock_barcode.field_stock_barcode_lot_line__display_name
+#. module: stock_barcode_custom
+#: model:ir.model.fields,field_description:stock_barcode_custom.field_stock_barcode_lot__display_name
+#: model:ir.model.fields,field_description:stock_barcode_custom.field_stock_barcode_lot_line__display_name
 msgid "Display Name"
 msgstr "Nom affiché"
 
-#. module: stock_barcode
-#: model:ir.model.fields,field_description:stock_barcode.field_stock_barcode_lot__id
-#: model:ir.model.fields,field_description:stock_barcode.field_stock_barcode_lot_line__id
+#. module: stock_barcode_custom
+#: model:ir.model.fields,field_description:stock_barcode_custom.field_stock_barcode_lot__id
+#: model:ir.model.fields,field_description:stock_barcode_custom.field_stock_barcode_lot_line__id
 msgid "ID"
 msgstr "Identifiant"
 
-#. module: stock_barcode
-#: model:ir.model,name:stock_barcode.model_product_product
-#: model:ir.model.fields,field_description:stock_barcode.field_stock_barcode_lot__product_id
+#. module: stock_barcode_custom
+#: model:ir.model,name:stock_barcode_custom.model_product_product
+#: model:ir.model.fields,field_description:stock_barcode_custom.field_stock_barcode_lot__product_id
 msgid "Product"
 msgstr "Produit"

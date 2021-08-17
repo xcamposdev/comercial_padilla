@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': "Barcode",
+    'name': "Barcode Custom",
     'summary': "Use barcode scanners to process logistics operations",
     'description': """
 This module enables the barcode scanning feature for the warehouse management system.
     """,
     'category': 'Operations/Inventory',
     'version': '1.0',
-    'depends': ['barcodes', 'stock', 'web_tour'],
+    'depends': ['base','barcodes', 'stock', 'web_tour', 'sale'],
     'data': [
         'views/stock_inventory_views.xml',
         'views/stock_picking_views.xml',

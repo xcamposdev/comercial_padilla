@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.picking_kanban', function (require) {
+odoo.define('stock_barcode_custom.picking_kanban', function (require) {
 'use strict';
 
 var KanbanRecord = require('web.KanbanRecord');

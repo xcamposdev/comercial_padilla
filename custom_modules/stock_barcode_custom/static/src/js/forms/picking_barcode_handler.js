@@ -1,4 +1,4 @@
-odoo.define('stock_barcode.PickingBarcodeHandler', function (require) {
+odoo.define('stock_barcode_custom.PickingBarcodeHandler', function (require) {
 "use strict";
 
 var core = require('web.core');
@@ -110,7 +110,7 @@ var PickingBarcodeHandler = AbstractField.extend({
             setQuantityWithKeypress: true,
             commands: {
                 'barcode': '_barcodePickingAddRecordId',
-                'O-CMD.MAIN-MENU': _.bind(this.do_action, this, 'stock_barcode.stock_barcode_action_main_menu', {clear_breadcrumbs: true}),
+                'O-CMD.MAIN-MENU': _.bind(this.do_action, this, 'stock_barcode_custom.stock_barcode_action_main_menu', {clear_breadcrumbs: true}),
             }
         });
     },
