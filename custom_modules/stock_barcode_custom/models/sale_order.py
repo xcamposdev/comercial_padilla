@@ -6,7 +6,8 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-class SaleOrderStockbacode(models.Model):
+
+class SaleOrderStockBacode(models.Model):
     
     _inherit = "sale.order"
 
@@ -93,7 +94,7 @@ class SaleOrderStockbacode(models.Model):
         location_domain = []
         second_level_suggested_lines = []
         result = []
-        resupply_products = []
+        # resupply_products = []
         quant_domain = [('product_id', 'in', list(products.keys())),
                         ('quantity', '>', 0)]
         stock_quantity = self.env['stock.quant']
@@ -120,7 +121,7 @@ class SaleOrderStockbacode(models.Model):
                         raise UserError(
                             'El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
                                 p['package_id'][1], p['product_id'][1]))
-                    packs_requested = SaleOrderStockbacode._get_available_per_pack(
+                    packs_requested = SaleOrderStockBacode._get_available_per_pack(
                         requested_qty, available_qty, packaging_ids[p['package_id'][0]]['qty'])
                     if packs_requested > 0:
                         result.append({
@@ -139,7 +140,7 @@ class SaleOrderStockbacode(models.Model):
                                 'uom_id': uom_id,
                                 'package_id': False,
                                 'location_id': packaging_ids[p['package_id'][0]]['x_location'][0],
-                                'available_qty': available_qty,
+                                'available_qty': available_qty - packs_requested,
                             })
                     elif available_qty > 0:
                         second_level_suggested_lines.append({
@@ -163,7 +164,7 @@ class SaleOrderStockbacode(models.Model):
         products_missed = [key for key, val in products.items() if val['qty'] > 0]
 
         if len(products_missed) > 0:
-            packages_to_unit = SaleOrderStockbacode.group_by_field(second_level_suggested_lines, 'product_id')
+            packages_to_unit = SaleOrderStockBacode.group_by_field(second_level_suggested_lines, 'product_id')
             for p_id in products_missed:
                 if p_id in packages_to_unit and products[p_id]['qty'] > 0:
                     p_ref = packages_to_unit[p_id]
@@ -174,17 +175,26 @@ class SaleOrderStockbacode(models.Model):
                         result.append(p)
                         products[p_id]['qty'] -= qty
                 # elif products[p_id]['qty'] > 0:
-                #     resupply_products.append(
-                #
-                #     )
+                #     packs_to_suppy = self.env['product.packaging'].search([('product_id', '=', p_id)], order='qty desc')
+                #     for pack in packs_to_suppy:
+                #         qty_required = SaleOrderStockBacode._get_available_per_pack(
+                #             products[p_id]['qty'], 1000000, pack.qty)
+                #         resupply_products.append({
+                #                 'product_id': p_id,
+                #                 'uom_id': pack.product_id.uom_id.id,
+                #                 'package_id': pack.id,
+                #                 'location_id': pack.x_location.id,
+                #                 'qty': qty_required,
+                #                 're_supply': True,
+                #         })
+                #         products[p_id]['qty'] -= qty_required
 
-        # TODO:  this will be changes to a correct way to suggest the missed products by packages
         products_missed = [key for key, val in products.items() if val['qty'] > 0]
 
         if len(products_missed) > 0:
             _logger.debug("Called: {} products that are not available: {}".format('products_pick_finder', products_missed))
         _logger.debug("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
-        return SaleOrderStockbacode.group_by_field(result, group_by), products_missed
+        return SaleOrderStockBacode.group_by_field(result, group_by), products_missed
 
     def get_suggestions_by_id(self, sale_order_id):
         sale_order = self.search([('id', '=', int(sale_order_id))])
@@ -196,7 +206,7 @@ class SaleOrderStockbacode(models.Model):
 
         :return: bool
         """
-        sale = super(SaleOrderStockbacode, self).action_confirm()
+        sale = super(SaleOrderStockBacode, self).action_confirm()
 
         if self.warehouse_id.delivery_steps != 'pick_pack_ship' and not self.warehouse_id.x_auto_re_stock:
             return sale
@@ -224,19 +234,20 @@ class SaleOrderStockbacode(models.Model):
             ('origin', '=', self.order_line.move_ids[0].origin)], limit=1)
 
         for location_id, move_lines in lines_to_compute.items():
-            picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
-            for m_line in move_lines:
-                if m_line['package_id']:
-                    self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
-                                              m_line['uom_id'], m_line['qty'],
-                                              location_id, stock_id, m_line['package_id'][0])
-                else:
-                    self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
-                                              m_line['uom_id'], m_line['qty'],
-                                              location_id, stock_id)
+            if location_id != stock_id:
+                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
+                for m_line in move_lines:
+                    if m_line['package_id']:
+                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
+                                                  m_line['uom_id'], m_line['qty'],
+                                                  location_id, stock_id, m_line['package_id'][0])
+                    else:
+                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
+                                                  m_line['uom_id'], m_line['qty'],
+                                                  location_id, stock_id)
 
-            picking_id.action_confirm()
-            picking_id.action_assign()
+                picking_id.action_confirm()
+                picking_id.action_assign()
 
         return sale
 
