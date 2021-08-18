@@ -15,11 +15,30 @@
 
 .o_stock_barcode_main_menu {
     text-align: center;
-    background-color: #fff;
+    background-color: #424040;
     padding: 24px 16px;
     font-size: 1.2em;
     overflow: auto;
     @include size(100%);
+
+    h1 {
+        color: white;
+    }
+
+    .text-left {
+        font-size: 15px;
+        color: white;
+    }
+
+    .row .col {
+        padding: 0px;
+        margin: 0px;
+    }
+
+    .btn {
+        border-color: #424040;
+        height: 70px;
+    }
 
     .o_stock_barcode_menu {
         line-height: 1.9;
