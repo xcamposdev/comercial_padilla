@@ -8,7 +8,7 @@ This module enables the barcode scanning feature for the warehouse management sy
     """,
     'category': 'Operations/Inventory',
     'version': '1.0',
-    'depends': ['base','barcodes', 'stock', 'web_tour', 'sale'],
+    'depends': ['base', 'web', 'barcodes', 'stock', 'web_tour', 'sale', 'padilla_tss_partner_custom'],
     'data': [
         'views/stock_inventory_views.xml',
         'views/stock_picking_views.xml',
@@ -19,7 +19,11 @@ This module enables the barcode scanning feature for the warehouse management sy
         'views/stock_scrap_views.xml',
         'views/stock_location_views.xml',
         'wizard/stock_barcode_lot_view.xml',
+        'views/stock_warehouse.xml',
+        'views/stock_move.xml',
         'data/data.xml',
+        'views/product_packaging.xml',
+        'views/stock_quant.xml',
     ],
     'qweb': [
         "static/src/xml/stock_barcode.xml",
@@ -29,6 +33,5 @@ This module enables the barcode scanning feature for the warehouse management sy
         'data/demo.xml',
     ],
     'installable': True,
-    'application': True,
-    'license': 'OEEL-1',
+    'application': True
 }

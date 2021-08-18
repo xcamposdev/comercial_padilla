@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
@@ -119,6 +117,7 @@ class StockBarcodeLot(models.TransientModel):
         if not lot:
             lot = self.env['stock.production.lot'].create({'name': barcode, 'product_id': self.product_id.id})
         return lot
+
 
 class StockBarcodeLotLine(models.TransientModel):
     _name = "stock_barcode.lot.line"

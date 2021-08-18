@@ -75,7 +75,7 @@
         <field name="mode">primary</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile oe_background_grey o_emphasize_colors" create="0">
+            <kanban class="o_barcode_custom o_kanban_mobile oe_background_grey o_emphasize_colors" create="0">
                 <field name="display_name"/>
                 <field name="color"/>
                 <field name="count_picking_ready"/>
@@ -152,7 +152,7 @@
         <field name="mode">primary</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" create="false">
+            <kanban class="o_kanban_mobile o_barcode_custom" create="false">
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="amount_total"/>
