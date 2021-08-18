@@ -1,7 +1,7 @@
 from itertools import groupby
 import logging
 import threading
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -48,6 +48,29 @@ class SaleOrderStockbacode(models.Model):
                     weight = data.product_id.weight_uom_name
                     break
             order.x_weight_total_uom = weight
+
+    def open_picking_client_action(self):
+        self.ensure_one()
+        use_form_handler = self.env['ir.config_parameter'].sudo().get_param('stock_barcode_custom.use_form_handler')
+        if use_form_handler:
+            view_id = self.env.ref('stock.view_picking_form').id
+            return {
+                'name': _('Open picking form'),
+                'res_model': 'stock.picking',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'res_id': self.id,
+            }
+        else:
+            picking_ids = list(data.id for data in self.picking_ids if data.picking_type_id.id == self.warehouse_id.pick_type_id.id)
+            action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
+            params = {
+                'model': 'stock.picking',
+                'picking_id': picking_ids,#self.id,
+                'nomenclature_id': [self.env.company.nomenclature_id.id],
+            }
+            return dict(action, target='fullscreen', params=params)
 
     @staticmethod
     def group_by_field(data, group_by):

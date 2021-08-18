@@ -117,3 +117,31 @@ class StockInventory(models.Model):
             action = dict(action, target='fullscreen', params=params)
 
         return action
+
+    @api.model
+    def open_new_inventory_form_sale(self):
+        company_user = self.env.company
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_user.id)], limit=1)
+        if warehouse:
+            default_location_id = warehouse.lot_stock_id
+        else:
+            raise UserError(_('You must define a warehouse for the company: %s.') % (company_user.name,))
+
+        action = self.env.ref('stock_barcode_custom.stock_barcode_inventory_client_action').read()[0]
+        if self.env.ref('stock.warehouse0', raise_if_not_found=False):
+            new_inv = self.env['stock.inventory'].create({
+                'start_empty': True,
+                'name': fields.Date.context_today(self),
+                'location_ids': [(4, default_location_id.id, None)],
+            })
+            new_inv.action_start()
+            action['res_id'] = new_inv.id
+
+            params = {
+                'model': 'stock.inventory',
+                'inventory_id': new_inv.id,
+            }
+            action['context'] = {'active_id': new_inv.id}
+            action = dict(action, target='fullscreen', params=params)
+
+        return action
