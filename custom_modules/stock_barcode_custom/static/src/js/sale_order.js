@@ -21,5 +21,5 @@ odoo.define('stock_barcode_custom.sale_order_kanban', function (require) {
         }
     });
     
-    });
+});
     

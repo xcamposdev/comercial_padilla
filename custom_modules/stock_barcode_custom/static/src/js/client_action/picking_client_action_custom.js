@@ -2,7 +2,7 @@ odoo.define('stock_barcode_custom.picking_client_action_custom', function (requi
 'use strict';
 
 var core = require('web.core');
-var ClientAction = require('stock_barcode_custom.ClientAction');
+var ClientAction = require('stock_barcode_custom.ClientAction_custom');
 var ViewsWidget = require('stock_barcode_custom.ViewsWidget');
 
 var _t = core._t;
@@ -21,7 +21,7 @@ var PickingClientAction = ClientAction.extend({
     }),
 
     init: function (parent, action) {
-        console.log("ANDRES");
+        
         this._super.apply(this, arguments);
         this.context = action.context;
         this.commands['O-BTN.scrap'] = this._scrap.bind(this);
@@ -296,6 +296,7 @@ var PickingClientAction = ClientAction.extend({
                 'write_vals': formattedCommands,
                 'write_field': 'move_line_ids',
             };
+            
             return this._rpc({
                 'route': '/stock_barcode_custom/get_set_barcode_view_state',
                 'params': params,

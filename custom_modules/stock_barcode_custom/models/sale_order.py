@@ -64,7 +64,8 @@ class SaleOrderStockBacode(models.Model):
                 'res_id': self.id,
             }
         else:
-            picking_ids = list(data.id for data in self.picking_ids if data.picking_type_id.id == self.warehouse_id.pick_type_id.id)
+            picking_ids = list(data.id for data in self.picking_ids \
+                                            if data.picking_type_id.id == self.warehouse_id.pick_type_id.id or data.picking_type_id.id == self.warehouse_id.int_type_id.id)
             action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
             params = {
                 'model': 'stock.picking',
