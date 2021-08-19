@@ -66,8 +66,10 @@ class SaleOrderStockBacode(models.Model):
         else:
             picking_ids = list(data.id for data in self.picking_ids \
                                             if data.picking_type_id.id == self.warehouse_id.pick_type_id.id or data.picking_type_id.id == self.warehouse_id.int_type_id.id)
+            data_custom = self.get_suggestions_by_id(self.id)
             action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
             params = {
+                'suggestions_custom': data_custom,
                 'model': 'stock.picking',
                 'picking_id': picking_ids,#self.id,
                 'nomenclature_id': [self.env.company.nomenclature_id.id],

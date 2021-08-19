@@ -32,12 +32,23 @@
     <t t-name="stock_barcode_picking_template">
         <t t-if="picking">
             <t t-foreach="picking" t-as="line">
-                <div class="o_barcode_line list-group-item d-flex flex-row flex-nowrap">
-                    <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
-                        <span t-esc="line.name" />
-                        <span t-esc="line.picking_type_id" />
-                    </div>
-                </div>
+                <t t-if="line and line != []">
+                    <t t-log="'line'"/>
+                    <t t-log="line"/>
+                    <t t-foreach="line" t-as="subline">
+                        <t t-foreach="subline" t-as="subsubline">
+                            <div class="o_barcode_line list-group-item d-flex flex-row flex-nowrap">
+                                <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
+                                    <t t-log="'subsubline'"/>
+                                    <t t-log="subsubline"/>
+                                    <span t-esc="subsubline['location_id']" />
+                                    <span t-esc="subsubline.product_id" />
+                                    <span t-esc="subsubline.location_id" />
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
             </t>
         </t>
     </t>

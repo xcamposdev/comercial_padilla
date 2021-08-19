@@ -41,6 +41,7 @@ var ClientAction = AbstractAction.extend({
             pickingId: action.params.picking_id,
             inventoryId: action.params.inventory_id,
             model: action.params.model,
+            suggestions_custom: action.params.suggestions_custom,
         };
 
         // Temp patch for the height issue
@@ -150,7 +151,6 @@ var ClientAction = AbstractAction.extend({
             });
         }
         return def.then(function (res) {
-            self.pickings_custom = res;
             self.currentState = res[0];
             self.initialState = $.extend(true, {}, res[0]);
             self.title += self.initialState.name;

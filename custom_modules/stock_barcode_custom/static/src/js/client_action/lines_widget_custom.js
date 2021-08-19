@@ -18,7 +18,6 @@ var LinesWidget = Widget.extend({
     init: function (parent, page, pageIndex, nbPages) {
         console.log("INIT");
         this._super.apply(this, arguments);
-        this.picking_custom = parent.pickings_custom;
         this.page = page;
         this.pageIndex = pageIndex;
         this.nbPages = nbPages;
@@ -27,6 +26,7 @@ var LinesWidget = Widget.extend({
         this.model = parent.actionParams.model;
         this.show_entire_packs = parent.show_entire_packs;
         this.requireLotNumber = parent.requireLotNumber;
+        this.suggestions_custom = parent.actionParams.suggestions_custom;
     },
 
     start: function () {
@@ -249,7 +249,7 @@ var LinesWidget = Widget.extend({
         // Render and append the page summary.
         var $header = this.$el.filter('.o_barcode_lines_picking');
         var $pageSummary = $(QWeb.render('stock_barcode_picking_template', {
-            picking: this.picking_custom,
+            picking: this.suggestions_custom,
         }));
         $header.append($pageSummary);
 
