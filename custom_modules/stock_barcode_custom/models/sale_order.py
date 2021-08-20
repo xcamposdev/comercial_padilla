@@ -66,13 +66,14 @@ class SaleOrderStockBacode(models.Model):
         else:
             picking_ids = list(data.id for data in self.picking_ids \
                                             if data.picking_type_id.id == self.warehouse_id.pick_type_id.id or data.picking_type_id.id == self.warehouse_id.int_type_id.id)
-            data_custom = self.get_suggestions_by_id(self.id)
+            data_custom = self.get_suggestions_by_so(picking_ids[::-1])
             action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
             params = {
                 'suggestions_custom': data_custom,
                 'model': 'stock.picking',
-                'picking_id': picking_ids,#self.id,
+                'picking_id': picking_ids[::-1][0],
                 'nomenclature_id': [self.env.company.nomenclature_id.id],
+                'picking_ids': picking_ids,
             }
             return dict(action, target='fullscreen', params=params)
 
@@ -199,9 +200,30 @@ class SaleOrderStockBacode(models.Model):
         _logger.debug("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
         return SaleOrderStockBacode.group_by_field(result, group_by), products_missed
 
-    def get_suggestions_by_id(self, sale_order_id):
-        sale_order = self.search([('id', '=', int(sale_order_id))])
-        return self.products_pick_finder(sale_order.order_line)
+    def get_suggestions_by_so(self, picking_ids):
+        result = {}
+        for picking in self.env['stock.picking'].search([('id', 'in', picking_ids)]):
+            result[picking.id] = []
+            for line in picking.move_ids_without_package:
+                res_line = {
+                    'product_id': line.product_id.id,
+                    'product_name': line.product_id.display_name,
+                    'uom_id': line.product_id.uom_id.id,
+                    'location_id': line.location_id.id,
+                    'location_name': line.location_id.display_name,
+                    'qty': line.product_uom_qty,
+                }
+                if line.x_packaging.id:
+                    product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
+                                                                         ('x_package', '=', line.x_packaging.id)],
+                                                                        limit=1)
+                    res_line['package_id'] = line.x_packaging.id
+                    res_line['package_name'] = line.x_packaging.name
+                    res_line['packages_count'] = line.product_uom_qty // product_pack.qty
+                    res_line['pack_size'] = product_pack.qty
+
+                result[picking.id].append(res_line)
+        return result
 
     def action_confirm(self):
         """ This method extends the actual behavior adding an automatic option to create
@@ -287,6 +309,7 @@ class SaleOrderStockBacode(models.Model):
             'company_id': last_move.company_id.id,
             'partner_id': last_move.partner_id.id,
             'rule_id': False,
+            'picking_type_entire_packs': True,
             'procure_method': 'make_to_stock',
             'picking_type_id': picking_id.picking_type_id.id,
             'group_id': last_move.group_id.id,
@@ -312,6 +335,7 @@ class SaleOrderStockBacode(models.Model):
             'scheduled_date': last_move.date,
             'origin': last_move.origin,
             'sale_id': self.id,
+            'picking_type_entire_packs': True,
             'group_id': last_move.group_id.id,
         }
         res = self.env['stock.picking'].create(stock_picking_values)

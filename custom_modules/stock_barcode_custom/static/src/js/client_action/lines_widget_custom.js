@@ -17,6 +17,10 @@ var LinesWidget = Widget.extend({
 
     init: function (parent, page, pageIndex, nbPages) {
         console.log("INIT");
+        console.log(parent);
+        console.log(page);
+        console.log(pageIndex);
+        console.log(nbPages);
         this._super.apply(this, arguments);
         this.page = page;
         this.pageIndex = pageIndex;
@@ -26,7 +30,9 @@ var LinesWidget = Widget.extend({
         this.model = parent.actionParams.model;
         this.show_entire_packs = parent.show_entire_packs;
         this.requireLotNumber = parent.requireLotNumber;
-        this.suggestions_custom = parent.actionParams.suggestions_custom;
+        this.suggestions_custom = parent.suggestions_custom[parent.actionParams.pickingId];
+        this.picking_ids = parent.actionParams.picking_ids;
+        this.picking_id = parent.actionParams.pickingId;
     },
 
     start: function () {
@@ -210,11 +216,17 @@ var LinesWidget = Widget.extend({
      * reload in order to highlight location and display correct scan message
      */
     getState: function () {
+        // Obtiene la localizacion y la localizacion destino junto con un bool para mostrar o no un mensaje
+//        return {
+//            'highlightLocationSource': this.$('.o_barcode_summary_location_src').hasClass('o_barcode_summary_location_highlight'),
+//            'highlightDestinationLocation': this.$('.o_barcode_summary_location_dest').hasClass('o_barcode_summary_location_highlight'),
+//            'scan_message': this.$('.o_scan_message:not(.o_hidden)').attr('class').split('o_scan_message_')[1].split(' ')[0],
+//        };
         return {
-            'highlightLocationSource': this.$('.o_barcode_summary_location_src').hasClass('o_barcode_summary_location_highlight'),
-            'highlightDestinationLocation': this.$('.o_barcode_summary_location_dest').hasClass('o_barcode_summary_location_highlight'),
-            'scan_message': this.$('.o_scan_message:not(.o_hidden)').attr('class').split('o_scan_message_')[1].split(' ')[0],
-        };
+            'highlightLocationSource': 23,
+            'highlightDestinationLocation': 23,
+            'scan_message': 'test message',
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -235,11 +247,7 @@ var LinesWidget = Widget.extend({
      */
      _renderLines: function () {
          if (this.mode === 'done') {
-             if (this.model === 'stock.picking') {
-                 this._toggleScanMessage('picking_already_done');
-             } else if (this.model === 'stock.inventory') {
-                 this._toggleScanMessage('inv_already_done');
-             }
+             this._toggleScanMessage('picking_already_done');
              return;
          } else if (this.mode === 'cancel') {
              this._toggleScanMessage('picking_already_cancelled');
@@ -248,9 +256,20 @@ var LinesWidget = Widget.extend({
 
         // Render and append the page summary.
         var $header = this.$el.filter('.o_barcode_lines_picking');
+        console.log(this.picking_ids);
+        const suggestion_index = this.picking_ids.indexOf(this.picking_id);
         var $pageSummary = $(QWeb.render('stock_barcode_picking_template', {
             picking: this.suggestions_custom,
+            locationName: this.page.location_name,
+            locationDestName: this.page.location_dest_name,
+            nbPages: this.nbPages,
+            pageIndex: this.pageIndex + 1,
+            mode: this.mode,
+            model: this.model,
+            count_lines: Array.isArray(this.picking_ids) ? this.picking_ids.length : 1,
+            suggestion_index: suggestion_index >= 0 ? suggestion_index + 1 : 1,
         }));
+        console.log(this.actionParams);
         $header.append($pageSummary);
 
         // Render and append the lines, if any.
@@ -271,19 +290,15 @@ var LinesWidget = Widget.extend({
         var $next = this.$('.o_next_page');
         var $previous = this.$('.o_previous_page');
         var $validate = this.$('.o_validate_page');
-        if (this.nbPages === 1) {
-            $next.prop('disabled', true);
-            $previous.prop('disabled', true);
-        }
+//        if (this.nbPages === 1) {
+//            $next.prop('disabled', true);
+//            $previous.prop('disabled', true);
+//        }
         if (this.pageIndex + 1 === this.nbPages) {
             //$next.toggleClass('o_hidden');
-            $next.prop('disabled', true);
+//            $next.prop('disabled', true);
         } else {
             $validate.toggleClass('o_hidden');
-        }
-
-        if (! this.page.lines.length && this.model !== 'stock.inventory') {
-            $validate.prop('disabled', true);
         }
 
         this._handleControlButtons();
@@ -297,15 +312,6 @@ var LinesWidget = Widget.extend({
         } else if (this.mode === 'no_multi_locations') {
             this._toggleScanMessage('scan_products');
         }
-
-         var $summary_src = this.$('.o_barcode_summary_location_src');
-         var $summary_dest = this.$('.o_barcode_summary_location_dest');
-
-         if (this.mode === 'receipt') {
-             $summary_dest.toggleClass('o_barcode_summary_location_highlight', true);
-         } else if (this.mode === 'delivery' || this.mode === 'internal') {
-             $summary_src.toggleClass('o_barcode_summary_location_highlight', true);
-         }
      },
 
     /**
@@ -314,19 +320,19 @@ var LinesWidget = Widget.extend({
      * @private
      */
     _handleControlButtons: function () {
-        var $next = this.$('.o_next_page');
-        var $validate = this.$('.o_validate_page');
-        if (! $next.hasClass('o_hidden')) {
-            this._highlightNextButtonIfNeeded();
-        } else {
-            $next.prop('disabled', true);
-        }
-
-        if (! $validate.hasClass('o_hidden')) {
-            this._highlightValidateButtonIfNeeded();
-        } else {
-            $validate.prop('disabled', true);
-        }
+//        var $next = this.$('.o_next_page');
+//        var $validate = this.$('.o_validate_page');
+//        if (! $next.hasClass('o_hidden')) {
+//            this._highlightNextButtonIfNeeded();
+//        } else {
+//            $next.prop('disabled', true);
+//        }
+//
+//        if (! $validate.hasClass('o_hidden')) {
+//            this._highlightValidateButtonIfNeeded();
+//        } else {
+//            $validate.prop('disabled', true);
+//        }
     },
 
     /**

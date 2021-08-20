@@ -31,6 +31,12 @@ class StockPicking(models.Model):
         """
         fields_to_read = self._get_picking_fields_to_read()
         pickings = self.read(fields_to_read)
+        picking_type_ids = [self.sale_id.warehouse_id.pick_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
+        picking_ids = self.search([('origin', '=', self.origin), ('picking_type_id', 'in', picking_type_ids)])
+        if self not in picking_ids:
+            pickings = picking_ids.read(fields_to_read)
+            # pickings = picking_ids[0].read(fields_to_read)
+        data_custom = self.get_suggestions_by_so(picking_ids)
         for picking in pickings:
             picking['move_line_ids'] = self.env['stock.move.line'].browse(picking.pop('move_line_ids')).read([
                 'product_id',
@@ -85,12 +91,41 @@ class StockPicking(models.Model):
             picking['actionReportBarcodesPdfId'] = self.env.ref('stock.action_label_transfer_template_pdf').id
             if self.env.company.nomenclature_id:
                 picking['nomenclature_id'] = [self.env.company.nomenclature_id.id]
+            if data_custom:
+                picking['suggestions_custom'] = data_custom
+                picking['picking_ids'] = picking_ids.ids
         return pickings
+
+    def get_suggestions_by_so(self, picking_ids):
+        result = {}
+        for picking in picking_ids:
+            result[picking.id] = []
+            for line in picking.move_ids_without_package:
+                res_line = {
+                    'product_id': line.product_id.id,
+                    'product_name': line.product_id.display_name,
+                    'uom_id': line.product_id.uom_id.id,
+                    'location_id': line.location_id.id,
+                    'location_name': line.location_id.display_name,
+                    'qty': line.product_uom_qty,
+                }
+                if line.x_packaging.id:
+                    product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
+                                                                         ('x_package', '=', line.x_packaging.id)],
+                                                                        limit=1)
+                    res_line['package_id'] = line.x_packaging.id
+                    res_line['package_name'] = line.x_packaging.name
+                    res_line['packages_count'] = line.product_uom_qty // product_pack.qty
+                    res_line['pack_size'] = product_pack.qty
+
+                result[picking.id].append(res_line)
+        return result
 
     def _get_picking_fields_to_read(self):
         """ Return the default fields to read from the picking.
         """
         return [
+            'id',
             'move_line_ids',
             'picking_type_id',
             'location_id',
@@ -99,6 +134,7 @@ class StockPicking(models.Model):
             'state',
             'picking_type_code',
             'company_id',
+            'origin',
         ]
 
     def get_po_to_split_from_barcode(self, barcode):

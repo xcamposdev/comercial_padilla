@@ -30,27 +30,32 @@
     </t>
 
     <t t-name="stock_barcode_picking_template">
-        <t t-if="picking">
-            <t t-foreach="picking" t-as="line">
-                <t t-if="line and line != []">
-                    <t t-log="'line'"/>
-                    <t t-log="line"/>
-                    <t t-foreach="line" t-as="subline">
-                        <t t-foreach="subline" t-as="subsubline">
-                            <div class="o_barcode_line list-group-item d-flex flex-row flex-nowrap">
-                                <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
-                                    <t t-log="'subsubline'"/>
-                                    <t t-log="subsubline"/>
-                                    <span t-esc="subsubline['location_id']" />
-                                    <span t-esc="subsubline.product_id" />
-                                    <span t-esc="subsubline.location_id" />
+        <div class="o_custom_suggestion_content">
+            <t t-if="picking">
+                <div class="content-boxes">
+                    <div class="wrap-cols">
+                        <t t-foreach="picking" t-as="subsubline">
+                            <div class="o_suggestion_line simple-col" t-att-data-id="subsubline.product_id" t-att-data-barcode="subsubline.product_id">
+                                <h3><span t-esc="subsubline.location_name" /></h3>
+                                <div class="info-wrap">
+                                    <span class="o_hide" t-esc="subsubline.product_id" />
+                                    <span class="o_product_name" t-esc="subsubline.product_name" />
+                                    <t t-if="subsubline.package_id">
+                                        <span class="o_package_name" t-esc="subsubline.package_name"></span>
+                                        <span>Cantidad: <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
+                                    </t>
+                                    <t t-if="!subsubline.package_id">
+                                        <span>cantidad: <span class="o_line_qty" t-esc="subsubline.qty" /></span>
+                                    </t>
                                 </div>
-                            </div>
+                             </div>
                         </t>
-                    </t>
-                </t>
+                    </div>
+               </div>
+                <div class='float-ball'><span class="o_lines_completed" t-esc="suggestion_index"></span>/<span t-esc="count_lines"/></div>
             </t>
-        </t>
+        </div>
+
     </t>
 
     <!-- <t t-name="stock_barcode_lines_template">
@@ -88,7 +93,7 @@
                         <div class="o_barcode_line_title pb-1"><i class="fa fa-fw fa-tags"/> <span class="product-label"><t t-esc="line.product_id.display_name"></t></span></div>
                         <div>
                             <i class="fa fa-fw fa-cube"/>
-                            <span t-attf-class="o_barcode_scanner_qty text-monospace badge #{' '}"> 
+                            <span t-attf-class="o_barcode_scanner_qty text-monospace badge #{' '}">
                                 <span class="product_qty d-inline-block text-left" t-esc="line.product_qty"/>
                                 <span t-if="line.theoretical_qty" t-esc="'/ ' + line.theoretical_qty"/>
                             </span>
@@ -120,7 +125,7 @@
                         </div>
                         <div>
                             <i class="fa fa-fw fa-cube"/>
-                            <span t-attf-class="o_barcode_scanner_qty text-monospace badge #{' '}"> 
+                            <span t-attf-class="o_barcode_scanner_qty text-monospace badge #{' '}">
                                 <span class="d-inline-block text-left" t-if="packageLine.qty_done != 0">1</span>
                                 <span class="d-inline-block text-left" t-else="">0</span>
                                 <span t-if="packageLine.reservedPackage">/  1</span>

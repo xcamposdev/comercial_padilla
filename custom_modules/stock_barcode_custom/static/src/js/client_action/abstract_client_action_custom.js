@@ -39,6 +39,7 @@ var ClientAction = AbstractAction.extend({
         // We keep a copy of the action's parameters in order to make the calls to `this._getState`.
         this.actionParams = {
             pickingId: action.params.picking_id,
+            picking_ids: action.params.picking_ids,
             inventoryId: action.params.inventory_id,
             model: action.params.model,
             suggestions_custom: action.params.suggestions_custom,
@@ -85,7 +86,7 @@ var ClientAction = AbstractAction.extend({
 
     willStart: function () {
         var self = this;
-        var recordId = this.actionParams.pickingId || this.actionParams.inventoryId;
+        var recordId = this.actionParams.pickingId;
         return Promise.all([
             self._super.apply(self, arguments),
             self._getState(recordId),
@@ -152,6 +153,11 @@ var ClientAction = AbstractAction.extend({
         }
         return def.then(function (res) {
             self.currentState = res[0];
+            console.log('_getState');
+            console.log(res);
+            if (recordId != self.currentState.id) {
+                self.actionParams.pickingId = self.currentState.id;
+            }
             self.initialState = $.extend(true, {}, res[0]);
             self.title += self.initialState.name;
             self.groups = {
@@ -163,6 +169,9 @@ var ClientAction = AbstractAction.extend({
             };
             self.show_entire_packs = self.currentState.show_entire_packs;
             self.requireLotNumber = true;
+            self.suggestions_custom = self.currentState.suggestions_custom;
+            self.picking_ids = self.currentState.picking_ids;
+            self.has_origin = self.currentState.origin;
 
             return res;
         });
@@ -399,6 +408,7 @@ var ClientAction = AbstractAction.extend({
      */
     _makePages: function () {
         // ACA SE DEBE MODIFICAR LAS PAGINAS
+        console.log('ACA SE DEBE MODIFICAR LAS PAGINAS sam');
         var pages = [];
         var defaultPage = {};
         var self = this;
@@ -1551,19 +1561,6 @@ var ClientAction = AbstractAction.extend({
                             'default_location_id': default_location_id,
                             'default_location_dest_id': default_location_dest_id,
                             'default_qty_done': 1,
-                        },
-                        false
-                    );
-                } else if (self.actionParams.model === 'stock.inventory') {
-                    self.ViewsWidget = new ViewsWidget(
-                        self,
-                        'stock.inventory.line',
-                        'stock_barcode_custom.stock_inventory_line_barcode',
-                        {
-                            'default_company_id': default_company_id,
-                            'default_inventory_id': self.currentState.id,
-                            'default_location_id': default_location_id,
-                            'default_product_qty': 1,
                         },
                         false
                     );
