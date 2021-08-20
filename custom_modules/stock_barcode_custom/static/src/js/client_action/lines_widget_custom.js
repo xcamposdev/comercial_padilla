@@ -30,9 +30,10 @@ var LinesWidget = Widget.extend({
         this.model = parent.actionParams.model;
         this.show_entire_packs = parent.show_entire_packs;
         this.requireLotNumber = parent.requireLotNumber;
-        this.suggestions_custom = parent.suggestions_custom[parent.actionParams.pickingId];
-        this.picking_ids = parent.actionParams.picking_ids;
-        this.picking_id = parent.actionParams.pickingId;
+        this.picking_ids = parent.picking_ids || parent.actionParams.picking_ids;
+        this.picking_id = parent.pickingId || parent.actionParams.pickingId;
+        this.suggestions_custom = parent.suggestions_custom[this.picking_id];
+
     },
 
     start: function () {

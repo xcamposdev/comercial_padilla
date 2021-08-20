@@ -66,8 +66,7 @@ var ClientAction = AbstractAction.extend({
         this.pages = [];            // Groups separating the pages.
         this.currentPageIndex = 0;  // The displayed page index related to `this.pages`.
         this.groups = {};
-        this.title = this.actionParams.model === 'stock.inventory' ? // title of
-            _('Inventory ') : ''; // the main navbar
+        this.title = this.actionParams.model === 'Pick process';
 
         this.mode = undefined;      // supported mode: `receipt`, `internal`, `delivery`, `inventory`
         this.scannedLocation = undefined;
@@ -85,6 +84,7 @@ var ClientAction = AbstractAction.extend({
     },
 
     willStart: function () {
+        console.log('willStart');
         var self = this;
         var recordId = this.actionParams.pickingId;
         return Promise.all([
@@ -98,6 +98,7 @@ var ClientAction = AbstractAction.extend({
     },
 
     start: function () {
+        console.log('start');
         var self = this;
         this.$('.o_content').addClass('o_barcode_client_action');
         core.bus.on('barcode_scanned', this, this._onBarcodeScannedHandler);
@@ -118,6 +119,7 @@ var ClientAction = AbstractAction.extend({
     },
 
     destroy: function () {
+        console.log('destroy');
         core.bus.off('barcode_scanned', this, this._onBarcodeScannedHandler);
         this._super();
     },
@@ -137,6 +139,8 @@ var ClientAction = AbstractAction.extend({
      * @return {Promise}
      */
     _getState: function (recordId, state) {
+        console.log('_getState');
+        console.log(recordId);
         var self = this;
         var def;
         if (state) {
@@ -184,6 +188,7 @@ var ClientAction = AbstractAction.extend({
      * @return {Promise}
      */
     _getProductBarcodes: function () {
+        console.log('_getProductBarcodes');
         var self = this;
         if (cache.productsByBarcode) {
             self.productsByBarcode = cache.productsByBarcode;
@@ -201,6 +206,7 @@ var ClientAction = AbstractAction.extend({
     },
 
     _getProductByBarcode: async function (barcode) {
+        console.log('_getProductByBarcode');
         var self = this;
         var product = this.productsByBarcode[barcode];
         if (product) {
@@ -221,6 +227,7 @@ var ClientAction = AbstractAction.extend({
 
     _loadNomenclature: function () {
         // barcode nomenclature
+        console.log('_loadNomenclature');
         this.barcodeParser = new BarcodeParser({'nomenclature_id': this.currentState.nomenclature_id});
         if (this.barcodeParser) {
             return this.barcodeParser.load();
@@ -249,6 +256,7 @@ var ClientAction = AbstractAction.extend({
      * @return {Promise}
      */
     _getLocationBarcodes: function () {
+        console.log('_getLocationBarcodes');
         var self = this;
         if (cache.locationsByBarcode) {
             self.locationsByBarcode = cache.locationsByBarcode;
@@ -336,6 +344,7 @@ var ClientAction = AbstractAction.extend({
      * @returns {Array} array of objects representing the new or modified lines
      */
     _compareStates: function () {
+        console.log('_compareStates');
         var modifiedMovelines = [];
         var writeableFields = this._getWriteableFields();
 
@@ -408,7 +417,7 @@ var ClientAction = AbstractAction.extend({
      */
     _makePages: function () {
         // ACA SE DEBE MODIFICAR LAS PAGINAS
-        console.log('ACA SE DEBE MODIFICAR LAS PAGINAS sam');
+        console.log('_makePages');
         var pages = [];
         var defaultPage = {};
         var self = this;
@@ -499,12 +508,16 @@ var ClientAction = AbstractAction.extend({
      * @returns {Promise}
      */
      _reloadLineWidget: function (pageIndex) {
-        
-        var self = this
+        console.log('_reloadLineWidget');
+        var self = this;
         if (this.linesWidget) {
             this.linesWidget.destroy();
         }
         var nbPages = this.pages.length;
+        console.log(nbPages);
+        console.log(pageIndex);
+        console.log(this.pages[pageIndex]);
+        console.log(this.page);
         var preparedPage = $.extend(true, {}, this.pages[pageIndex]);
         this.linesWidget = new LinesWidget(this, preparedPage, pageIndex, nbPages);
         return this.linesWidget.appendTo(this.$('.o_content')).then(function() {
@@ -671,6 +684,7 @@ var ClientAction = AbstractAction.extend({
      * @private
      */
     _endBarcodeFlow: function () {
+        console.log('_endBarcodeFlow');
         this.scanned_location = undefined;
         this.scannedLines = [];
         this.scanned_location_dest = undefined;
@@ -689,6 +703,7 @@ var ClientAction = AbstractAction.extend({
      * @returns object|boolean line or false if nothing match
      */
     _findCandidateLineToIncrement: function (params) {
+        console.log('_findCandidateLineToIncrement');
         var product = params.product;
         var lotId = params.lot_id;
         var lotName = params.lot_name;
@@ -783,6 +798,7 @@ var ClientAction = AbstractAction.extend({
      * @return {object} object wrapping the incremented line and some other informations
      */
     _incrementLines: function (params) {
+        console.log('_incrementLines');
         var line = this._findCandidateLineToIncrement(params);
         var isNewLine = false;
         if (line) {
@@ -851,6 +867,7 @@ var ClientAction = AbstractAction.extend({
      * @returns {Promise}
      */
     _step_source: function (barcode, linesActions) {
+        console.log('_step_source');
         var self = this;
         this.currentStep = 'source';
         var errorMessage;
@@ -913,6 +930,7 @@ var ClientAction = AbstractAction.extend({
      * @returns {Promise}
      */
     _step_product: async function (barcode, linesActions) {
+        console.log('_step_product');
         var self = this;
         this.currentStep = 'product';
         var errorMessage;
@@ -984,6 +1002,7 @@ var ClientAction = AbstractAction.extend({
     },
 
     _step_package: function (barcode, linesActions) {
+        console.log('_step_package');
         // search stock.quant.packe location_id child_of main location ; name barcode
         // then make a search on quants package_id chilf of barcode
         // call a `_packageMakeNewLines` methode overriden by picking and inventory or increment the existing lines
@@ -1352,6 +1371,7 @@ var ClientAction = AbstractAction.extend({
      * @returns {Promise}
      */
     _step_destination: function (barcode, linesActions) {
+        console.log('_step_destination');
         var errorMessage;
 
         // Bypass the step if needed.
@@ -1413,17 +1433,53 @@ var ClientAction = AbstractAction.extend({
      *
      * @return {Promise}
      */
+//     willStart: function () {
+//        console.log('willStart');
+//        var self = this;
+//        var recordId = this.actionParams.pickingId;
+//        return Promise.all([
+//            self._super.apply(self, arguments),
+//            self._getState(recordId),
+//            self._getProductBarcodes(),
+//            self._getLocationBarcodes()
+//        ]).then(function () {
+//            return self._loadNomenclature();
+//        });
+//    },
     _nextPage: function (){
         var self = this;
+        console.log('_nextPage');
+        var pickingId = self.currentState.id;
+        var line_index = self.picking_ids.indexOf(pickingId);
+        if (self.picking_ids.length > 1 && line_index >= 0) {
+            if ((line_index + 2) > self.picking_ids.length) {
+                self.pickingId = self.picking_ids[0];
+            } else {
+                self.pickingId = self.picking_ids[line_index + 1];
+            }
+        }
+        console.log(self.pickingId);
         this.mutex.exec(function () {
-            return self._save().then(function () {
-                if (self.currentPageIndex < self.pages.length - 1) {
-                    self.currentPageIndex++;
-                }
-                var prom =  self._reloadLineWidget(self.currentPageIndex);
-                self._endBarcodeFlow();
-                return prom;
+            console.log(self.pickingId);
+            console.log(pickingId);
+            return Promise.all([
+                self._getState(self.pickingId),
+                self._getProductBarcodes(),
+                self._getLocationBarcodes(),
+                self._loadNomenclature()
+            ]).then(function () {
+                return self._save().then(function () {
+                    console.log(self.currentPageIndex);
+                    console.log('despues de save _nextPage');
+                    if (self.currentPageIndex < self.pages.length - 1) {
+                        self.currentPageIndex++;
+                    }
+                    var prom =  self._reloadLineWidget(self.currentPageIndex);
+                    self._endBarcodeFlow();
+                    return prom;
+                });
             });
+
         });
     },
 
@@ -1453,6 +1509,7 @@ var ClientAction = AbstractAction.extend({
      * @returns {Promise}
      */
     _firstPage: function () {
+        console.log('_firstPage');
         var self = this;
         return self._save().then(function () {
             if (self.currentPageIndex !== 0) {
@@ -1668,6 +1725,7 @@ var ClientAction = AbstractAction.extend({
      * @param {OdooEvent} ev ev.data could contain res_id
      */
     _onReload: function (ev) {
+        console.log('_onReload');
         ev.stopPropagation();
         if (this.ViewsWidget) {
             this.ViewsWidget.destroy();
@@ -1683,8 +1741,7 @@ var ClientAction = AbstractAction.extend({
             if (record) {
                 var newPageIndex = _.findIndex(self.pages, function (page) {
                     return page.location_id === record.data.location_id.res_id &&
-                           (self.actionParams.model === 'stock.inventory' ||
-                            page.location_dest_id === record.data.location_dest_id.res_id);
+                            page.location_dest_id === record.data.location_dest_id.res_id;
                 });
                 if (newPageIndex === -1) {
                     new Error('broken');
@@ -1711,6 +1768,7 @@ var ClientAction = AbstractAction.extend({
      * @param {OdooEvent} ev
      */
     _onNextPage: function (ev) {
+        console.log('_onNextPage');
         ev.stopPropagation();
         this._nextPage();
     },
