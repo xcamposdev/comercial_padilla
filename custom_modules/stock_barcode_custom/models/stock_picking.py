@@ -104,6 +104,9 @@ class StockPicking(models.Model):
                 res_line = {
                     'product_id': line.product_id.id,
                     'product_name': line.product_id.display_name,
+                    'product_image': line.product_id.image_1920,
+                    'product_description_picking': line.product_id.description_picking,
+                    'product_x_manufacturer': line.product_id.x_manufacturer_code,
                     'uom_id': line.product_id.uom_id.id,
                     'location_id': line.location_id.id,
                     'location_name': line.location_id.display_name,

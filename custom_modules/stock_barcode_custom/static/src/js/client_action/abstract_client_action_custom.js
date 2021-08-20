@@ -66,7 +66,8 @@ var ClientAction = AbstractAction.extend({
         this.pages = [];            // Groups separating the pages.
         this.currentPageIndex = 0;  // The displayed page index related to `this.pages`.
         this.groups = {};
-        this.title = this.actionParams.model === 'Pick process';
+        this.title = this.actionParams.model === 'stock.inventory' ? // title of
+            _('Inventory ') : ''; // the main navbar
 
         this.mode = undefined;      // supported mode: `receipt`, `internal`, `delivery`, `inventory`
         this.scannedLocation = undefined;
@@ -1433,19 +1434,6 @@ var ClientAction = AbstractAction.extend({
      *
      * @return {Promise}
      */
-//     willStart: function () {
-//        console.log('willStart');
-//        var self = this;
-//        var recordId = this.actionParams.pickingId;
-//        return Promise.all([
-//            self._super.apply(self, arguments),
-//            self._getState(recordId),
-//            self._getProductBarcodes(),
-//            self._getLocationBarcodes()
-//        ]).then(function () {
-//            return self._loadNomenclature();
-//        });
-//    },
     _nextPage: function (){
         var self = this;
         console.log('_nextPage');
