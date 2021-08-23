@@ -15,7 +15,7 @@
     </t>
 
     <t t-name="stock_barcode_lines_widget_custom">
-        <div class="o_barcode_lines_picking">
+        <div class="o_barcode_lines_picking o_custom_content">
         </div>
         <div class="o_barcode_lines list-group flex-grow-1 d-block bg-100 position-relative"></div>
 
@@ -48,28 +48,20 @@
                                                 <span t-esc="subsubline.product_name" />
                                             </div>
                                             <div class="col-4">
-                                                <t t-if="subsubline.product_x_manufacturer">
-                                                    <span><strong>Ref Fabricante:</strong> <span t-esc="subsubline.product_x_manufacturer" /></span>
-                                                </t>
+                                                <span><strong>Ref Fabricante:</strong> <span t-if="subsubline.product_x_manufacturer" t-esc="subsubline.product_x_manufacturer" /></span>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <t t-if="subsubline.product_description_picking">
-                                                <div class="col-12">
-                                                    <span t-esc="subsubline.product_description_picking" />
-                                                </div>
-                                            </t>
+                                            <div class="col-12">
+                                                <span><strong>Descripción:</strong><span t-if="subsubline.product_description_picking" t-esc="subsubline.product_description_picking" /></span>
+                                            </div>
                                             <div class="col-4">
-                                                <t t-if="!subsubline.package_id">
-                                                    <span><strong>Cantidad:</strong> <span class="o_line_qty" t-esc="subsubline.qty" /></span>
-                                                </t>
+                                                <span><strong>Cantidad:</strong> <span class="o_line_qty" t-if="!subsubline.package_id" t-esc="subsubline.qty" /></span>
                                             </div>
                                             <div class="col-4">
                                                 <span t-esc="subsubline.package_id"/>
-                                                <t t-if="subsubline.package_id">
-                                                    <span class="o_package_name" t-esc="subsubline.package_name"></span>
-                                                    <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
-                                                </t>
+                                                <span class="o_package_name" t-esc="subsubline.package_name"></span>
+                                                <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-if="subsubline.package_id" t-esc="subsubline.packages_count"></span></span>
                                             </div>
                                         </div>
                                     </div>
