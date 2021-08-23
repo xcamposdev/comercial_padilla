@@ -195,7 +195,7 @@
                                 </div>
                                 <div class="col-6">
                                     <strong>
-                                        <field name="x_inventory_state" widget="label_selection" options="{'classes': {'pick': 'success', 'pack': 'warning', 'out': 'success'}}"/>
+                                        <field name="x_inventory_state" widget="label_selection" options="{'classes': {'pick': 'primary', 'pack': 'secondary', 'out': 'success'}}"/>
                                     </strong>
                                 </div>
                             </div>

@@ -43,6 +43,7 @@ var ClientAction = AbstractAction.extend({
             inventoryId: action.params.inventory_id,
             model: action.params.model,
             suggestions_custom: action.params.suggestions_custom,
+            state: action.params.x_inventory_state,
         };
 
         // Temp patch for the height issue

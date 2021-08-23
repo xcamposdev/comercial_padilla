@@ -100,6 +100,7 @@ class SaleOrderStockBacode(models.Model):
                 'picking_id': picking_ids[::-1][0],
                 'nomenclature_id': [self.env.company.nomenclature_id.id],
                 'picking_ids': picking_ids,
+                'x_inventory_state': self.x_inventory_state,
             }
             return dict(action, target='fullscreen', params=params)
 

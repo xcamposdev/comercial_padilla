@@ -2,7 +2,17 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="stock_barcode_header_widget_custom">
-        <div class="o_barcode_header navbar navbar-expand navbar-dark bg-beta">
+        <t t-if="widget.state =='pick'">
+            <t t-set="style" t-value="'background-color:#00A09D !important;'" />
+        </t>
+        <t t-if="widget.state =='pack'">
+            <t t-set="style" t-value="'background-color:#6c757d !important;'" />
+        </t>
+        <t t-if="widget.state =='out'">
+            <t t-set="style" t-value="'background-color:#00A04A !important;'" />
+        </t>
+        <!-- <span t-att-style="style" >Test</span> -->
+        <div class="o_barcode_header navbar navbar-expand navbar-dark bg-beta" t-att-style="style">
             <nav class="navbar-nav mr-auto">
                 <a tabindex="" class="nav-link o_exit mr-4"><i class="fa fa-chevron-left"/></a>
                 <span class="o_title navbar-text text-white"><t t-esc="widget.title"></t></span>
@@ -36,8 +46,13 @@
                     <div class="o_kanban_view o_kanban_ungrouped simple-col">
                         <t t-foreach="picking" t-as="subsubline">
                             <div class="o_kanban_record">
-                                <div class="o_kanban_image">
-                                    <img t-attf-src="data:image/png;base64,{{subsubline.product_image}}" class="o_image_64_contain"/>
+                                <div class="o_kanban_image o_width_128">
+                                    <t t-if="subsubline.product_image">
+                                        <img t-attf-src="data:image/png;base64,{{subsubline.product_image}}" class="o_image_64_contain"/>
+                                    </t>
+                                    <t t-else="">
+                                        <img src="/web/static/src/img/placeholder.png" class="o_image_64_contain"/>
+                                    </t>
                                 </div>
                                 <div class="oe_kanban_details">
                                     <div t-att-data-id="subsubline.product_id" t-att-data-barcode="subsubline.product_id">
