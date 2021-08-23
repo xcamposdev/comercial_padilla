@@ -13,6 +13,7 @@ var PickingClientAction = ClientAction.extend({
         'picking_print_picking': '_onPrintPicking',
         'picking_print_barcodes_zpl': '_onPrintBarcodesZpl',
         'picking_print_barcodes_pdf': '_onPrintBarcodesPdf',
+        "picking_print_bultos_pdf": "_onPrintBultosPdf",
         'picking_scrap': '_onScrap',
         'validate': '_onValidate',
         'cancel': '_onCancel',
@@ -484,6 +485,11 @@ var PickingClientAction = ClientAction.extend({
         });
     },
 
+    _onPrintBultosPdf: function (ev) {
+        ev.stopPropagation();
+        this._printBultosPdf();
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -559,6 +565,28 @@ var PickingClientAction = ClientAction.extend({
     _onPrintBarcodesPdf: function (ev) {
         ev.stopPropagation();
         this._printBarcodesPdf();
+    },
+
+    /**
+     * Handles the `print_bultos_pdf` OdooEvent. It makes an RPC call
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _printBultosPdf: function () {
+        var self = this;
+        this.mutex.exec(function () {
+            return self._save().then(function () {
+                console.log(self)
+                return self.do_action(self.currentState.actionReportBultoId, {
+                    'additional_context': {
+                        'active_id': self.actionParams.pickingId,
+                        'active_ids': [self.actionParams.pickingId],
+                        'active_model': 'stock.picking',
+                    }
+                });
+            });
+        });
     },
 
     /**

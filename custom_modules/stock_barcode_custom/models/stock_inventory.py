@@ -145,3 +145,8 @@ class StockInventory(models.Model):
             action = dict(action, target='fullscreen', params=params)
 
         return action
+
+    def change_source(self, new_location):
+        if 'id' in new_location.keys():
+            return self.write({'location_ids': [(6, 0, [new_location['id']])]})
+        return False
