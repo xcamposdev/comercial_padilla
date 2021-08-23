@@ -47,21 +47,21 @@
                                             <div class="col-8">
                                                 <span t-esc="subsubline.product_name" />
                                             </div>
-                                            <div class="col-4">
-                                                <span><strong>Ref Fabricante:</strong> <span t-if="subsubline.product_x_manufacturer" t-esc="subsubline.product_x_manufacturer" /></span>
+                                            <div t-if="subsubline.product_x_manufacturer" class="col-4">
+                                                <span><strong>Ref Fabricante:</strong> <span t-esc="subsubline.product_x_manufacturer" /></span>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-12">
-                                                <span><strong>Descripción:</strong><span t-if="subsubline.product_description_picking" t-esc="subsubline.product_description_picking" /></span>
+                                            <div t-if="subsubline.product_description_picking" class="col-12">
+                                                <span><strong>Descripción:</strong><span t-esc="subsubline.product_description_picking" /></span>
                                             </div>
-                                            <div class="col-4">
-                                                <span><strong>Cantidad:</strong> <span class="o_line_qty" t-if="!subsubline.package_id" t-esc="subsubline.qty" /></span>
+                                            <div t-if="!subsubline.package_id"  class="col-4">
+                                                <span><strong>Cantidad:</strong> <span class="o_line_qty" t-esc="subsubline.qty" /></span>
                                             </div>
-                                            <div class="col-4">
+                                            <div t-if="subsubline.package_id" class="col-4">
                                                 <span t-esc="subsubline.package_id"/>
                                                 <span class="o_package_name" t-esc="subsubline.package_name"></span>
-                                                <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-if="subsubline.package_id" t-esc="subsubline.packages_count"></span></span>
+                                                <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
                                             </div>
                                         </div>
                                     </div>

@@ -190,13 +190,21 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12">
+                                <div class="col-6">
                                     <strong>Delivery date:</strong> <span t-esc="record.commitment_date.value" />
+                                </div>
+                                <div class="col-6">
+                                    <strong>
+                                        <field name="x_inventory_state" widget="label_selection" options="{'classes': {'pick': 'success', 'pack': 'warning', 'out': 'success'}}"/>
+                                    </strong>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
-                                    <strong>Nro of picks:</strong> <span t-esc="record.x_picking_count.value" />
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pick'">Nro of picks:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pack'">Nro of packs:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'out'">Nro of out:</strong>
+                                    <span t-esc="record.x_picking_count.value" />
                                 </div>
                                 <div class="col-6">
                                     <strong>Nro of items:</strong> <span t-esc="record.x_item_count.value" />

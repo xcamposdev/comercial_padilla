@@ -13,10 +13,17 @@ class SaleOrderStockBacode(models.Model):
 
     x_partner_id_x_is_tss = fields.Boolean(string='¿Es TSS?', compute="_compute_get_partner_x_is_tss")
     x_picking_count = fields.Integer(string='Nro of picks', compute='_compute_number_picks')
+    x_pack_count = fields.Integer(string='Nro of pack', compute='_compute_number_picks')
+    x_out_count = fields.Integer(string='Nro of out', compute='_compute_number_picks')
     x_item_count = fields.Integer(string='Nro of items', compute='_compute_number_items')
     x_unit_total = fields.Integer(string='Nro of units', compute='_compute_number_units')
     x_weight_total = fields.Float(string="Weight total", compute="_compute_weight_total")
     x_weight_total_uom = fields.Char(string="Weight Uom", compute="_compute_weight_total_uom")
+    x_inventory_state = fields.Selection(selection=[
+            ('pick', 'Pick'),
+            ('pack', 'Pack'),
+            ('out', 'Out')
+        ], string='Status', compute="_compute_number_picks")
 
     def _compute_get_partner_x_is_tss(self):
         for record in self:
@@ -26,8 +33,19 @@ class SaleOrderStockBacode(models.Model):
     def _compute_number_picks(self):
         for order in self:
             if order.warehouse_id:
-                picks = list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id))
-                order.x_picking_count = len(picks)
+                order.x_picking_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id)))
+                order.x_pack_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id)))
+                order.x_out_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.out_type_id, order.warehouse_id.int_type_id)))
+                
+                pick_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
+                pack_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
+                out_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.out_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
+                if pick_done < order.x_picking_count:
+                    order.x_inventory_state = 'pick'
+                elif pack_done < order.x_pack_count:
+                    order.x_inventory_state = 'pack'
+                elif out_done < order.x_out_count:
+                    order.x_inventory_state = 'out'
 
     def _compute_number_items(self):
         for order in self:
@@ -64,8 +82,16 @@ class SaleOrderStockBacode(models.Model):
                 'res_id': self.id,
             }
         else:
-            picking_ids = list(data.id for data in self.picking_ids \
-                                            if data.picking_type_id.id == self.warehouse_id.pick_type_id.id or data.picking_type_id.id == self.warehouse_id.int_type_id.id)
+            if self.x_inventory_state == 'pick':
+                picking_ids = list(data.id for data in self.picking_ids \
+                                                if data.picking_type_id.id in (self.warehouse_id.pick_type_id.id, self.warehouse_id.int_type_id.id))
+            elif self.x_inventory_state == 'pack':
+                picking_ids = list(data.id for data in self.picking_ids \
+                                                if data.picking_type_id.id in (self.warehouse_id.pack_type_id.id, self.warehouse_id.int_type_id.id))
+            elif self.x_inventory_state == 'out':
+                picking_ids = list(data.id for data in self.picking_ids \
+                                                if data.picking_type_id.id in (self.warehouse_id.out_type_id.id, self.warehouse_id.int_type_id.id))
+
             data_custom = self.get_suggestions_by_so(picking_ids[::-1])
             action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
             params = {

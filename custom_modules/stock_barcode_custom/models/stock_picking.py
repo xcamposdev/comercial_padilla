@@ -31,7 +31,14 @@ class StockPicking(models.Model):
         """
         fields_to_read = self._get_picking_fields_to_read()
         pickings = self.read(fields_to_read)
-        picking_type_ids = [self.sale_id.warehouse_id.pick_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
+        if self.origin:
+            sale = self.env['sale.order'].search([('name','=',self.origin)])
+            if sale.x_inventory_state == 'pick':
+                picking_type_ids = [self.sale_id.warehouse_id.pick_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
+            if sale.x_inventory_state == 'pack':
+                picking_type_ids = [self.sale_id.warehouse_id.pack_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
+            if sale.x_inventory_state == 'out':
+                picking_type_ids = [self.sale_id.warehouse_id.out_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
         picking_ids = self.search([('origin', '=', self.origin), ('picking_type_id', 'in', picking_type_ids)])
         if self not in picking_ids:
             pickings = picking_ids.read(fields_to_read)
