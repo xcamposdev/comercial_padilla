@@ -129,7 +129,7 @@ class StockPicking(models.Model):
                                                                             limit=1)
                         res_line['package_id'] = line.result_package_id.id
                         res_line['package_name'] = line.result_package_id.name
-                        res_line['packages_count'] = res_line['qty'] / product_pack.qty
+                        res_line['packages_count'] = res_line['qty'] / (product_pack.qty or 1)
                         res_line['pack_size'] = product_pack.qty
 
                     result[picking.id].append(res_line)
