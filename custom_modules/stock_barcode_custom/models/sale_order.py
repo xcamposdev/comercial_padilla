@@ -82,13 +82,17 @@ class SaleOrderStockBacode(models.Model):
                 'res_id': self.id,
             }
         else:
+            state = 'done'
             if self.x_inventory_state == 'pick':
+                state = self.x_inventory_state
                 picking_ids = list(data.id for data in self.picking_ids \
                                                 if data.picking_type_id.id in (self.warehouse_id.pick_type_id.id, self.warehouse_id.int_type_id.id))
             elif self.x_inventory_state == 'pack':
+                state = self.x_inventory_state
                 picking_ids = list(data.id for data in self.picking_ids \
                                                 if data.picking_type_id.id in (self.warehouse_id.pack_type_id.id, self.warehouse_id.int_type_id.id))
             elif self.x_inventory_state == 'out':
+                state = self.x_inventory_state
                 picking_ids = list(data.id for data in self.picking_ids \
                                                 if data.picking_type_id.id in (self.warehouse_id.out_type_id.id, self.warehouse_id.int_type_id.id))
 
@@ -100,9 +104,14 @@ class SaleOrderStockBacode(models.Model):
                 'picking_id': picking_ids[::-1][0],
                 'nomenclature_id': [self.env.company.nomenclature_id.id],
                 'picking_ids': picking_ids,
-                'x_inventory_state': self.x_inventory_state,
+                'x_inventory_state': state,
             }
             return dict(action, target='fullscreen', params=params)
+
+    def get_suggestions_by_so(self, picking_ids):
+        pickings = self.env['stock.picking']
+        pickings = pickings.search([('id', 'in', picking_ids), ('state', 'not in', ['done', 'cancel'])])
+        return pickings.get_suggestions_by_so(pickings)
 
     @staticmethod
     def group_by_field(data, group_by):
@@ -223,34 +232,10 @@ class SaleOrderStockBacode(models.Model):
         products_missed = [key for key, val in products.items() if val['qty'] > 0]
 
         if len(products_missed) > 0:
-            _logger.debug("Called: {} products that are not available: {}".format('products_pick_finder', products_missed))
+            _logger.debug(
+                "Called: {} products that are not available: {}".format('products_pick_finder', products_missed))
         _logger.debug("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
         return SaleOrderStockBacode.group_by_field(result, group_by), products_missed
-
-    def get_suggestions_by_so(self, picking_ids):
-        result = {}
-        for picking in self.env['stock.picking'].search([('id', 'in', picking_ids)]):
-            result[picking.id] = []
-            for line in picking.move_ids_without_package:
-                res_line = {
-                    'product_id': line.product_id.id,
-                    'product_name': line.product_id.display_name,
-                    'uom_id': line.product_id.uom_id.id,
-                    'location_id': line.location_id.id,
-                    'location_name': line.location_id.display_name,
-                    'qty': line.product_uom_qty,
-                }
-                if line.x_packaging.id:
-                    product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
-                                                                         ('x_package', '=', line.x_packaging.id)],
-                                                                        limit=1)
-                    res_line['package_id'] = line.x_packaging.id
-                    res_line['package_name'] = line.x_packaging.name
-                    res_line['packages_count'] = line.product_uom_qty // product_pack.qty
-                    res_line['pack_size'] = product_pack.qty
-
-                result[picking.id].append(res_line)
-        return result
 
     def action_confirm(self):
         """ This method extends the actual behavior adding an automatic option to create
@@ -290,11 +275,13 @@ class SaleOrderStockBacode(models.Model):
                 picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
                 for m_line in move_lines:
                     if m_line['package_id']:
-                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
+                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
+                                                  m_line['product_id'][0],
                                                   m_line['uom_id'], m_line['qty'],
                                                   location_id, stock_id, m_line['package_id'][0])
                     else:
-                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1], m_line['product_id'][0],
+                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
+                                                  m_line['product_id'][0],
                                                   m_line['uom_id'], m_line['qty'],
                                                   location_id, stock_id)
 

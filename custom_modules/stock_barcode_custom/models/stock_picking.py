@@ -39,7 +39,9 @@ class StockPicking(models.Model):
                 picking_type_ids = [self.sale_id.warehouse_id.pack_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
             if sale.x_inventory_state == 'out':
                 picking_type_ids = [self.sale_id.warehouse_id.out_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
-        picking_ids = self.search([('origin', '=', self.origin), ('picking_type_id', 'in', picking_type_ids)])
+        picking_ids = self.search([('origin', '=', self.origin),
+                                   ('picking_type_id', 'in', picking_type_ids),
+                                   ('state', 'not in', ['done', 'cancel'])])
         if self not in picking_ids:
             pickings = picking_ids.read(fields_to_read)
             # pickings = picking_ids[0].read(fields_to_read)
@@ -107,28 +109,32 @@ class StockPicking(models.Model):
         result = {}
         for picking in picking_ids:
             result[picking.id] = []
-            for line in picking.move_ids_without_package:
-                res_line = {
-                    'product_id': line.product_id.id,
-                    'product_name': line.product_id.display_name,
-                    'product_image': line.product_id.image_1920,
-                    'product_description_picking': line.product_id.description_picking,
-                    'product_x_manufacturer': line.product_id.x_manufacturer_code,
-                    'uom_id': line.product_id.uom_id.id,
-                    'location_id': line.location_id.id,
-                    'location_name': line.location_id.display_name,
-                    'qty': line.product_uom_qty,
-                }
-                if line.x_packaging.id:
-                    product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
-                                                                         ('x_package', '=', line.x_packaging.id)],
-                                                                        limit=1)
-                    res_line['package_id'] = line.x_packaging.id
-                    res_line['package_name'] = line.x_packaging.name
-                    res_line['packages_count'] = line.product_uom_qty // product_pack.qty
-                    res_line['pack_size'] = product_pack.qty
+            for line in picking.move_line_ids_without_package:
+                if line.product_uom_qty - line.qty_done > 0:
+                    real_qty = line.product_uom_qty - line.qty_done
+                    res_line = {
+                        'product_id': line.product_id.id,
+                        'product_name': line.product_id.display_name,
+                        'product_image': line.product_id.image_1920,
+                        'product_description_picking': line.product_id.description_picking,
+                        'product_x_manufacturer': line.product_id.x_manufacturer_code,
+                        'uom_id': line.product_id.uom_id.id,
+                        'location_id': line.location_id.id,
+                        'location_name': line.location_id.display_name,
+                        'qty': real_qty,
+                    }
+                    if line.result_package_id.id:
+                        product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
+                                                                             ('x_package', '=', line.result_package_id.id)],
+                                                                            limit=1)
+                        res_line['package_id'] = line.result_package_id.id
+                        res_line['package_name'] = line.result_package_id.name
+                        res_line['packages_count'] = res_line['qty'] / product_pack.qty
+                        res_line['pack_size'] = product_pack.qty
 
-                result[picking.id].append(res_line)
+                    result[picking.id].append(res_line)
+            if len(result[picking.id]) <= 0:
+                del result[picking.id]
         return result
 
     def _get_picking_fields_to_read(self):

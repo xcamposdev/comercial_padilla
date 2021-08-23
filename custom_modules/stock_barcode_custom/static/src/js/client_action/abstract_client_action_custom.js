@@ -89,6 +89,11 @@ var ClientAction = AbstractAction.extend({
         console.log('willStart');
         var self = this;
         var recordId = this.actionParams.pickingId;
+        console.log(this.actionParams);
+        if (this.actionParams.picking_ids == undefined) {
+            console.log('history_back');
+            this.trigger_up('history_back');
+        }
         return Promise.all([
             self._super.apply(self, arguments),
             self._getState(recordId),
@@ -1361,7 +1366,9 @@ var ClientAction = AbstractAction.extend({
                 linesActions.push([self.linesWidget.incrementProduct, [res.id || res.virtualId, 1, self.actionParams.model]]);
                 linesActions.push([self.linesWidget.setLotName, [res.id || res.virtualId, barcode]]);
             }
-            return Promise.resolve({linesActions: linesActions});
+            self._save().then(function() {
+                return Promise.resolve({linesActions: linesActions});
+            });
         });
     },
 
@@ -1440,6 +1447,7 @@ var ClientAction = AbstractAction.extend({
         console.log('_nextPage');
         var pickingId = self.currentState.id;
         var line_index = self.picking_ids.indexOf(pickingId);
+        console.log(self.picking_ids);
         if (self.picking_ids.length > 1 && line_index >= 0) {
             if ((line_index + 2) > self.picking_ids.length) {
                 self.pickingId = self.picking_ids[0];
@@ -1451,24 +1459,25 @@ var ClientAction = AbstractAction.extend({
         this.mutex.exec(function () {
             console.log(self.pickingId);
             console.log(pickingId);
-            return Promise.all([
-                self._getState(self.pickingId),
-                self._getProductBarcodes(),
-                self._getLocationBarcodes(),
-                self._loadNomenclature()
-            ]).then(function () {
-                return self._save().then(function () {
-                    console.log(self.currentPageIndex);
-                    console.log('despues de save _nextPage');
-                    if (self.currentPageIndex < self.pages.length - 1) {
-                        self.currentPageIndex++;
-                    }
-                    var prom =  self._reloadLineWidget(self.currentPageIndex);
-                    self._endBarcodeFlow();
-                    return prom;
+            if (self.pickingId != undefined) {
+                return Promise.all([
+                    self._getState(self.pickingId),
+                    self._getProductBarcodes(),
+                    self._getLocationBarcodes(),
+                    self._loadNomenclature()
+                ]).then(function () {
+                    return self._save().then(function () {
+                        console.log(self.currentPageIndex);
+                        console.log('despues de save _nextPage');
+                        if (self.currentPageIndex < self.pages.length - 1) {
+                            self.currentPageIndex++;
+                        }
+                        var prom =  self._reloadLineWidget(self.currentPageIndex);
+                        self._endBarcodeFlow();
+                        return prom;
+                    });
                 });
-            });
-
+            }
         });
     },
 
@@ -1479,17 +1488,34 @@ var ClientAction = AbstractAction.extend({
      */
     _previousPage: function () {
         var self = this;
+        console.log('_previousPage');
+        var pickingId = self.currentState.id;
+        var line_index = self.picking_ids.indexOf(pickingId);
+        if (self.picking_ids.length > 1 && line_index >= 0) {
+            if ((line_index - 1) < 0 ) {
+                self.pickingId = self.picking_ids[self.picking_ids.length - 1];
+            } else {
+                self.pickingId = self.picking_ids[line_index - 1];
+            }
+        }
         this.mutex.exec(function () {
-            return self._save().then(function () {
-                if (self.currentPageIndex > 0) {
-                    self.currentPageIndex--;
-                } else {
-                    self.currentPageIndex = self.pages.length - 1;
-                }
-                var prom = self._reloadLineWidget(self.currentPageIndex);
-                self._endBarcodeFlow();
-                return prom;
-            });
+            if (self.pickingId != undefined) {
+                 return Promise.all([
+                    self._getState(self.pickingId),
+                    self._getProductBarcodes(),
+                    self._getLocationBarcodes(),
+                    self._loadNomenclature()
+                ]).then(function () {
+                    return self._save().then(function () {
+                        if (self.currentPageIndex < self.pages.length - 1) {
+                            self.currentPageIndex++;
+                        }
+                        var prom =  self._reloadLineWidget(self.currentPageIndex);
+                        self._endBarcodeFlow();
+                        return prom;
+                    });
+                });
+            }
         });
     },
     /**

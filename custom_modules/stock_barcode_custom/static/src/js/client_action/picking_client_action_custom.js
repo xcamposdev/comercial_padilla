@@ -174,7 +174,15 @@ var PickingClientAction = ClientAction.extend({
                     var def = Promise.resolve();
                     var successCallback = function(){
                         self.do_notify(_t("Success"), _t("The transfer has been validated"));
-                        self.trigger_up('exit');
+                        self._getState(self.actionParams.pickingId).then(function(res){
+                            console.log('successCallback 1');
+                            console.log(res);
+                            if (res[0]['state'] !== 'done') {
+                                self.trigger_up('next_page');
+                            } else {
+                                self.trigger_up('exit');
+                            }
+                        });
                     };
                     var exitCallback = function (infos) {
                         if ((infos === undefined || !infos.special) && this.dialog.$modal.is(':visible')) {
