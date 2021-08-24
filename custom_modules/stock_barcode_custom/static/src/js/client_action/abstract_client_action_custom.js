@@ -194,10 +194,10 @@ var ClientAction = AbstractAction.extend({
                 }
             }
 //            Todo: improve this code
-            if (!is_not_ready_to_validate && self._validate != undefined) {
-                console.log('Entro validacion');
-                return self._validate();
-            }
+//            if (!is_not_ready_to_validate && self._validate != undefined) {
+//                console.log('Entro validacion');
+//                return self._validate();
+//            }
 
             return res;
         });
@@ -1481,6 +1481,7 @@ var ClientAction = AbstractAction.extend({
         var pickingId = self.currentState.id;
         console.log(pickingId);
         self.picking_ids = picking_ids;
+        self.pickingId = pickingId;
         var line_index = picking_ids.indexOf(pickingId);
         if (self.picking_ids.length > 1 && line_index >= 0) {
             if ((line_index + 2) > self.picking_ids.length) {
