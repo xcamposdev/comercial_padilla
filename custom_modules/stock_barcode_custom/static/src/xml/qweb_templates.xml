@@ -92,7 +92,7 @@
                             <span t-if="groups.group_uom" t-esc="line.product_uom_id[1]"/>
                         </div>
                         <div t-if="line.package_id || line.result_package_id">
-                            <i class="fa fa-fw fa-truck"/> <t t-if="line.package_id" t-esc="line.package_id[1]"></t> <span class="fa fa-long-arrow-right"></span> <t t-if="line.result_package_id" t-esc="line.result_package_id[1]"></t>
+                            <i class="fa fa-fw fa-truck"/> <span class="packages_count" t-esc="line.packages_count"/> <t t-if="line.package_id" t-esc="line.package_id[1]"></t> <span class="fa fa-long-arrow-right"></span> <t t-if="line.result_package_id" t-esc="line.result_package_id[1]"></t>
                         </div>
                         <div t-if="line.owner_id">
                             <i class="fa fa-fw fa-user-o"/> <t t-esc="line.owner_id[1]"></t>

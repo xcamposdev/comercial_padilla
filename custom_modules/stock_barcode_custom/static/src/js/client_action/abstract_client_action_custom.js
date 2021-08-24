@@ -165,7 +165,9 @@ var ClientAction = AbstractAction.extend({
         }
         return def.then(function (res) {
             self.currentState = res[0];
-            console.log('_getState');
+            self.state = res[0].state;
+            console.log('_getState cp');
+            console.log(self.state);
             console.log(res);
             if (recordId != self.currentState.id) {
                 self.actionParams.pickingId = self.currentState.id;
@@ -998,69 +1000,9 @@ var ClientAction = AbstractAction.extend({
                         return Promise.resolve({linesActions: linesActions});
                     });
                 } else {
-                         //--------------------------------------------------------------
-                         // product_packaging_custom
-                         if (!self.has_origin && self.currentState.location_dest_id != undefined && product.x_location != undefined && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
-                         {
-                             if (self.scannedLines != "")
-                             {
-                                 var index = this._getLines(this.currentState).indexOf(res.lineDescription);
-                                 if (index !== -1) {
-                                     this._getLines(this.currentState).splice(index, 1);
-                                 }
-                                 var index = this.pages[this.currentPageIndex].lines.indexOf(res.lineDescription);
-                                 if (index !== -1) {
-                                     this.pages[this.currentPageIndex].lines.splice(index, 1);
-                                 }
-                                 //this._getLines(this.currentState).push(line);
-                                 //this.pages[this.currentPageIndex].lines.push(line);
-                                 errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + self.currentState.location_dest_id.display_name;
-                                 return Promise.reject(errorMessage);    
-                             }
-                             else
-                             {
-                                 res.lineDescription['location_dest_id'] = {
-                                     'id': product.x_location[0],
-                                     'display_name': product.x_location[1],
-                                 };
-                                 res.lineDescription['result_package_id'] = [product.x_package[0], product.x_package[1]];
-    
-                                 if (product.x_location_barcode)
-                                 {
-                                     var destinationLocation = self.locationsByBarcode[product.x_location_barcode];
-                                     if (destinationLocation) {
-                                         //self.pages[0].location_dest_id = location_dest_id
-                                         // var currentPage = this.pages[0];
-                                         // currentPage.location_dest_id = destinationLocation.id
-                                         // this.currentState.location_dest_id = destinationLocation;
-                                         self.currentState.location_dest_id = destinationLocation;
-    
-                                         //self.set_location_dest_barcode = product.x_location_barcode;
-                                         var param_write = {};
-                                         param_write.args = [[self.currentState.id], {location_dest_id: destinationLocation.id}];
-                                         param_write.method = 'write';
-                                         param_write.model='stock.picking';
-                                         param_write.kwargs = {};
-                                         param_write.kwargs.context=this.context;
-                                         var prom = this.call('ajax', 'rpc', "/web/dataset/call_kw/stock.picking/write", JSON.parse(JSON.stringify(param_write)), null, this);
-                                         $(".o_barcode_summary_location_dest ").text(product.x_location[1]);    
-                                     }
-                                 }
-                             }
-                         }
-                         //--------------------------------------------------------------
-    
                     linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
                 }
             } else {
-                     //--------------------------------------------------------------
-                     // product_packaging_custom
-                     if (self.currentState.location_dest_id != undefined && product.x_location != undefined && self.currentState.picking_type_code == "internal" && self.currentState.location_dest_id.id != product.x_location[0])
-                     {
-                         errorMessage = 'El producto seleccionado se encuentra en la ubicación ' + product.x_location[1] + ', esta ubicacion es distinta a ' + self.currentState.location_dest_id.display_name;
-                         return Promise.reject(errorMessage);
-                     }
-                     //--------------------------------------------------------------
                 if (product.tracking === 'none' || !self.requireLotNumber) {
                     linesActions.push([this.linesWidget.incrementProduct, [res.id || res.virtualId, product.qty || 1, this.actionParams.model]]);
                 } else {

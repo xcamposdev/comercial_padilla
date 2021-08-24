@@ -22,7 +22,8 @@ class SaleOrderStockBacode(models.Model):
     x_inventory_state = fields.Selection(selection=[
             ('pick', 'Pick'),
             ('pack', 'Pack'),
-            ('out', 'Out')
+            ('out', 'Out'),
+            ('done', 'Done')
         ], string='Status', compute="_compute_number_picks")
 
     def _compute_get_partner_x_is_tss(self):
@@ -46,6 +47,8 @@ class SaleOrderStockBacode(models.Model):
                     order.x_inventory_state = 'pack'
                 elif out_done < order.x_out_count:
                     order.x_inventory_state = 'out'
+                else:
+                    order.x_inventory_state = 'done'
 
     def _compute_number_items(self):
         for order in self:

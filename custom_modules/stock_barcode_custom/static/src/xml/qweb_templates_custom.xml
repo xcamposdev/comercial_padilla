@@ -31,7 +31,7 @@
 
         <div t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="o_barcode_control d-flex">
             <button t-if="widget.groups.group_tracking_lot and widget.model == 'stock.picking' and widget.state == 'pack'" class="btn btn-secondary text-uppercase o_put_in_pack"><i class="fa fa-cube mr-1"/> Put In Pack</button>
-            <button class="btn btn-secondary text-uppercase o_add_line"><i class="fa fa-plus mr-1"/> Add product</button>
+            <button t-if="widget.groups.group_tracking_lot and widget.model == 'stock.picking' and widget.state != 'pack'" class="btn btn-secondary text-uppercase o_add_line"><i class="fa fa-plus mr-1"/> Add product</button>
             <button class="btn btn-secondary text-uppercase o_validate_page"><i class="fa fa-check mr-1"/> Validate</button>
         </div>
         <div t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="o_barcode_control d-flex">

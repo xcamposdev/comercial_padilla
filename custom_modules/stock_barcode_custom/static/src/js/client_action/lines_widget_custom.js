@@ -301,7 +301,7 @@ var LinesWidget = Widget.extend({
             //$next.toggleClass('o_hidden');
 //            $next.prop('disabled', true);
         } else {
-            $validate.toggleClass('o_hidden');
+//            $validate.toggleClass('o_hidden');
         }
 
         this._handleControlButtons();
