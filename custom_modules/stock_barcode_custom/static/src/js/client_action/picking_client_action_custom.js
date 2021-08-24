@@ -14,6 +14,7 @@ var PickingClientAction = ClientAction.extend({
         'picking_print_barcodes_zpl': '_onPrintBarcodesZpl',
         'picking_print_barcodes_pdf': '_onPrintBarcodesPdf',
         "picking_print_bultos_pdf": "_onPrintBultosPdf",
+        "picking_print_matricula_pdf": "_onPrintMatriculaPdf",
         'picking_scrap': '_onScrap',
         'validate': '_onValidate',
         'cancel': '_onCancel',
@@ -180,18 +181,34 @@ var PickingClientAction = ClientAction.extend({
                     'args': [[self.actionParams.pickingId]],
                     'context': self.context,
                 }).then(function (res) {
+                    console.log('sam validate');
+                    console.log(res);
                     var def = Promise.resolve();
                     var successCallback = function(){
                         self.do_notify(_t("Success"), _t("The transfer has been validated"));
-                        self._getState(self.actionParams.pickingId).then(function(res){
-                            console.log('successCallback 1');
-                            console.log(res);
-                            if (res[0]['state'] !== 'done') {
-                                self.trigger_up('next_page');
-                            } else {
-                                self.trigger_up('exit');
-                            }
-                        });
+                        console.log(self);
+                        if (self.picking_ids == undefined) {
+                            console.log('entro do_action sam');
+                            self._endBarcodeFlow();
+                            self.do_action('stock_barcode_custom.sale_order_action_kanban');
+                        } else if (self.picking_ids.length > 0) {
+                            console.log('entro nex page sam');
+                            self.trigger_up('next_page');
+                        } else {
+                            console.log('entro exit sam');
+                            self.trigger_up('exit');
+                        }
+//                        self._getState(self.actionParams.pickingId).then(function(res){
+//                            console.log('successCallback 1');
+//                            console.log(res);
+//                            if (res[0].picking_ids != undefined && res[0].picking_ids.length > 0 && res[0].picking_ids.indexOf(self.actionParams.pickingId)) {
+//                                console.log('Entro Next sam');
+//                                self.trigger_up('next_page');
+//                            } else {
+//                                console.log('Entro exit sam');
+//                                self.trigger_up('exit');
+//                            }
+//                        });
                     };
                     var exitCallback = function (infos) {
                         if ((infos === undefined || !infos.special) && this.dialog.$modal.is(':visible')) {
@@ -498,6 +515,11 @@ var PickingClientAction = ClientAction.extend({
         this._printBultosPdf();
     },
 
+    _onPrintMatriculaPdf: function (ev) {
+        ev.stopPropagation();
+        this._printMatriculaPdf();
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -587,6 +609,27 @@ var PickingClientAction = ClientAction.extend({
             return self._save().then(function () {
                 console.log(self)
                 return self.do_action(self.currentState.actionReportBultoId, {
+                    'additional_context': {
+                        'active_id': self.actionParams.pickingId,
+                        'active_ids': [self.actionParams.pickingId],
+                        'active_model': 'stock.picking',
+                    }
+                });
+            });
+        });
+    },
+
+    /**
+     * Handles the `picking_print_matricula_pdf` OdooEvent. It makes an RPC call
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _printMatriculaPdf: function () {
+        var self = this;
+        this.mutex.exec(function () {
+            return self._save().then(function () {
+                return self.do_action(self.currentState.actionReportMatriculaId, {
                     'additional_context': {
                         'active_id': self.actionParams.pickingId,
                         'active_ids': [self.actionParams.pickingId],

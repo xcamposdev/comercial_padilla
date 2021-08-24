@@ -16,8 +16,7 @@ class Product(models.Model):
         if 'pickingId' in context.keys():
             picking_id = self.env['stock.picking'].search([('id', '=', context['pickingId'])])
             # Check if the movement is pick to pack
-            if picking_id.origin and picking_id.sale_id and picking_id.picking_type_id and \
-                    picking_id.sale_id.warehouse_id.pick_type_id.id == picking_id.picking_type_id.id:
+            if picking_id.origin:
                 product_ids = list(set(operations.product_id.id for operations in picking_id.move_ids_without_package))
                 product_domain.append(('id', 'in', product_ids))
                 packagin_domain.append(('product_id.id', 'in', product_ids))

@@ -9,6 +9,11 @@ class StockBarcodeController(http.Controller):
         """ Receive a barcode scanned from the main menu and return the appropriate
             action (open an existing / new picking) or warning.
         """
+
+        try_open_sale_order = StockBarcodeController.try_open_sale_order(barcode)
+        if try_open_sale_order:
+            return try_open_sale_order
+
         ret_open_picking = self.try_open_picking(barcode)
         if ret_open_picking:
             return ret_open_picking
@@ -136,4 +141,25 @@ class StockBarcodeController(http.Controller):
         if mode != 'read':
             request.env[model_name].browse(record_id).write({write_field: write_vals})
         return request.env[model_name].browse(record_id).get_barcode_view_state()
+
+    @staticmethod
+    def try_open_sale_order(barcode):
+        """ If barcode represent a sale type, open the sale"""
+        sale_order = request.env['sale.order'].search([
+            ('name', '=', barcode)
+        ], limit=1)
+        if sale_order:
+            view_id = request.env.ref('sale.view_order_form').id
+            return {
+                'action': {
+                    'name': _('Open Order form'),
+                    'res_model': 'sale.order',
+                    'view_mode': 'form',
+                    'view_id': view_id,
+                    'views': [(view_id, 'form')],
+                    'type': 'ir.actions.act_window',
+                    'res_id': sale_order.id,
+                }
+            }
+        return False
 

@@ -29,6 +29,7 @@ This module enables the barcode scanning feature for the warehouse management sy
         'views/stock_quant.xml',
         'report/print_bultos.xml',
         'views/res_user_view.xml',
+        'views/matricula_view.xml',
     ],
     'qweb': [
         "static/src/xml/stock_barcode.xml",

@@ -261,8 +261,10 @@ var LinesWidget = Widget.extend({
         var $header = this.$el.filter('.o_barcode_lines_picking');
         console.log(this.picking_ids);
         const suggestion_index = this.picking_ids.indexOf(this.picking_id);
+        var picking_lines = this.suggestions_custom || [];
         var $pageSummary = $(QWeb.render('stock_barcode_picking_template', {
-            picking: this.suggestions_custom || [],
+            picking: picking_lines,
+            show_pickings: picking_lines.length > 0 ? true : false,
             locationName: this.page.location_name,
             locationDestName: this.page.location_dest_name,
             nbPages: this.nbPages,

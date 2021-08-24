@@ -15,6 +15,7 @@ var SettingsWidget = Widget.extend({
         "click .o_print_bultos_pdf": "onClickBultosPDF",
         'click .o_print_inventory': '_onClickPrintInventory',
         'click .o_scrap': '_onClickScrap',
+        "click .o_print_matricula_pdf": "_onClickMatriculaPDF",
     },
 
     init: function (parent, model, mode, allow_scrap) {
@@ -29,6 +30,16 @@ var SettingsWidget = Widget.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * Handles the click on the `matricula button`.
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickMatriculaPDF: function (ev) {
+        ev.stopPropagation();
+        this.trigger_up('picking_print_matricula_pdf');
+    },
     /**
      * Handles the click on the `validate button`.
      *
