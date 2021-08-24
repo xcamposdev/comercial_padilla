@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_compare, float_round
+from odoo.tools.float_utils import float_is_zero, float_compare, float_round
 
 import json
 
 
 class StockMoveLine(models.Model):
-    _name= 'stock.move.line'
+    _name = 'stock.move.line'
     _inherit = ['stock.move.line', 'barcodes.barcode_events_mixin']
 
     product_barcode = fields.Char(related='product_id.barcode')
@@ -34,16 +34,20 @@ class StockPicking(models.Model):
         sale = self.env['sale.order']
         picking_type_ids = []
         if self.origin:
-            sale = sale.search([('name','=',self.origin)])
-            if sale.x_inventory_state == 'pick':
+            sale = sale.search([('name', '=', self.origin)])
+            if sale.x_inventory_state == 'pick' and self.env.user.x_pick:
                 picking_type_ids = [self.sale_id.warehouse_id.pick_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
-            if sale.x_inventory_state == 'pack':
+            if sale.x_inventory_state == 'pack' and self.env.user.x_pack:
                 picking_type_ids = [self.sale_id.warehouse_id.pack_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
-            if sale.x_inventory_state == 'out':
+            if sale.x_inventory_state == 'out' and self.env.user.x_out:
                 picking_type_ids = [self.sale_id.warehouse_id.out_type_id.id, self.sale_id.warehouse_id.int_type_id.id]
         picking_ids = self.search([('origin', '=', self.origin),
                                    ('picking_type_id', 'in', picking_type_ids),
                                    ('state', 'not in', ['done', 'cancel'])])
+
+        # Order by location name
+        picking_ids = picking_ids.sorted(key=lambda r: r.location_id.name)
+
         if self not in picking_ids:
             pickings = picking_ids.read(fields_to_read)
             # pickings = picking_ids[0].read(fields_to_read)
@@ -69,7 +73,8 @@ class StockPicking(models.Model):
             # Prefetch data
             product_ids = tuple(set([move_line_id['product_id'][0] for move_line_id in picking['move_line_ids']]))
             tracking_and_barcode_per_product_id = {}
-            for res in self.env['product.product'].with_context(active_test=False).search_read([('id', 'in', product_ids)], ['tracking', 'barcode']):
+            for res in self.env['product.product'].with_context(active_test=False).search_read(
+                    [('id', 'in', product_ids)], ['tracking', 'barcode']):
                 tracking_and_barcode_per_product_id[res.pop("id")] = res
 
             for move_line_id in picking['move_line_ids']:
@@ -94,18 +99,23 @@ class StockPicking(models.Model):
             picking['group_tracking_lot'] = self.env.user.has_group('stock.group_tracking_lot')
             picking['group_production_lot'] = self.env.user.has_group('stock.group_production_lot')
             picking['group_uom'] = self.env.user.has_group('uom.group_uom')
-            picking['use_create_lots'] = self.env['stock.picking.type'].browse(picking['picking_type_id'][0]).use_create_lots
-            picking['use_existing_lots'] = self.env['stock.picking.type'].browse(picking['picking_type_id'][0]).use_existing_lots
-            picking['show_entire_packs'] = self.env['stock.picking.type'].browse(picking['picking_type_id'][0]).show_entire_packs
+            picking['use_create_lots'] = self.env['stock.picking.type'].browse(
+                picking['picking_type_id'][0]).use_create_lots
+            picking['use_existing_lots'] = self.env['stock.picking.type'].browse(
+                picking['picking_type_id'][0]).use_existing_lots
+            picking['show_entire_packs'] = self.env['stock.picking.type'].browse(
+                picking['picking_type_id'][0]).show_entire_packs
             picking['actionReportDeliverySlipId'] = self.env.ref('stock.action_report_delivery').id
             picking['actionReportBarcodesZplId'] = self.env.ref('stock.action_label_transfer_template_zpl').id
             picking['actionReportBarcodesPdfId'] = self.env.ref('stock.action_label_transfer_template_pdf').id
+            picking['actionReportMatriculaId'] = self.env.ref(
+                'stock_barcode_custom.action_report_registration_order').id
             picking['actionReportBultoId'] = self.env.ref('stock_barcode_custom.action_report_package_sale_order').id
             if self.env.company.nomenclature_id:
                 picking['nomenclature_id'] = [self.env.company.nomenclature_id.id]
             if data_custom:
                 picking['suggestions_custom'] = data_custom
-                picking['picking_ids'] = picking_ids.ids
+                picking['picking_ids'] = picking_ids[::-1].ids
             if sale.x_inventory_state:
                 picking['state'] = sale.x_inventory_state
         return pickings
@@ -130,7 +140,8 @@ class StockPicking(models.Model):
                     }
                     if line.result_package_id.id:
                         product_pack = self.env['product.packaging'].search([('product_id', '=', line.product_id.id),
-                                                                             ('x_package', '=', line.result_package_id.id)],
+                                                                             ('x_package', '=',
+                                                                              line.result_package_id.id)],
                                                                             limit=1)
                         res_line['package_id'] = line.result_package_id.id
                         res_line['package_name'] = line.result_package_id.name
@@ -173,10 +184,10 @@ class StockPicking(models.Model):
         ])
 
         action_ctx = dict(self.env.context,
-            default_picking_id=self.id,
-            serial=self.product_id.tracking == 'serial',
-            default_product_id=product_id.id,
-            candidates=candidates.ids)
+                          default_picking_id=self.id,
+                          serial=self.product_id.tracking == 'serial',
+                          default_product_id=product_id.id,
+                          candidates=candidates.ids)
         view_id = self.env.ref('stock_barcode_custom.view_barcode_lot_form').id
         return {
             'name': _('Lot/Serial Number Details'),
@@ -210,7 +221,9 @@ class StockPicking(models.Model):
         if not self.show_reserved:
             picking_move_lines = self.move_line_nosuggest_ids
 
-        corresponding_ml = picking_move_lines.filtered(lambda ml: ml.product_id.id == product.id and not ml.result_package_id and not ml.location_processed and not ml.lots_visible)[:1]
+        corresponding_ml = picking_move_lines.filtered(lambda
+                                                           ml: ml.product_id.id == product.id and not ml.result_package_id and not ml.location_processed and not ml.lots_visible)[
+                           :1]
 
         if corresponding_ml:
             corresponding_ml.qty_done += qty
@@ -236,7 +249,8 @@ class StockPicking(models.Model):
         return True
 
     def _check_source_package(self, package):
-        corresponding_po = self.move_line_ids.filtered(lambda r: r.package_id.id == package.id and r.result_package_id.id == package.id)
+        corresponding_po = self.move_line_ids.filtered(
+            lambda r: r.package_id.id == package.id and r.result_package_id.id == package.id)
         for po in corresponding_po:
             po.qty_done = po.product_uom_qty
         if corresponding_po:
@@ -252,7 +266,9 @@ class StockPicking(models.Model):
         package for all the processed move lines not having a destination
         package.
         """
-        corresponding_ml = self.move_line_ids.filtered(lambda ml: not ml.result_package_id and float_compare(ml.qty_done, 0, precision_rounding=ml.product_uom_id.rounding) == 1)
+        corresponding_ml = self.move_line_ids.filtered(
+            lambda ml: not ml.result_package_id and float_compare(ml.qty_done, 0,
+                                                                  precision_rounding=ml.product_uom_id.rounding) == 1)
         # If the user processed the whole reservation (or more), simply
         # write the `package_id` field.
         # If the user processed less than the reservation, split the
@@ -282,7 +298,9 @@ class StockPicking(models.Model):
         """
         # Get back the move lines the user processed. Filter out the ones where
         # this method was already applied thanks to `location_processed`.
-        corresponding_ml = self.move_line_ids.filtered(lambda ml: not ml.location_processed and float_compare(ml.qty_done, 0, precision_rounding=ml.product_uom_id.rounding) == 1)
+        corresponding_ml = self.move_line_ids.filtered(
+            lambda ml: not ml.location_processed and float_compare(ml.qty_done, 0,
+                                                                   precision_rounding=ml.product_uom_id.rounding) == 1)
 
         # If the user processed the whole reservation (or more), simply
         # write the `location_dest_id` and `location_processed` fields
@@ -313,32 +331,38 @@ class StockPicking(models.Model):
     def on_barcode_scanned(self, barcode):
         if not self.env.company.nomenclature_id:
             # Logic for products
-            product = self.env['product.product'].search(['|', ('barcode', '=', barcode), ('default_code', '=', barcode)], limit=1)
+            product = self.env['product.product'].search(
+                ['|', ('barcode', '=', barcode), ('default_code', '=', barcode)], limit=1)
             if product:
                 if self._check_product(product):
                     return
 
             product_packaging = self.env['product.packaging'].search([('barcode', '=', barcode)], limit=1)
             if product_packaging.product_id:
-                if self._check_product(product_packaging.product_id,product_packaging.qty):
+                if self._check_product(product_packaging.product_id, product_packaging.qty):
                     return
 
             # Logic for packages in source location
             if self.move_line_ids:
-                package_source = self.env['stock.quant.package'].search([('name', '=', barcode), ('location_id', 'child_of', self.location_id.id)], limit=1)
+                package_source = self.env['stock.quant.package'].search(
+                    [('name', '=', barcode), ('location_id', 'child_of', self.location_id.id)], limit=1)
                 if package_source:
                     if self._check_source_package(package_source):
                         return
 
             # Logic for packages in destination location
-            package = self.env['stock.quant.package'].search([('name', '=', barcode), '|', ('location_id', '=', False), ('location_id','child_of', self.location_dest_id.id)], limit=1)
+            package = self.env['stock.quant.package'].search([('name', '=', barcode), '|', ('location_id', '=', False),
+                                                              ('location_id', 'child_of', self.location_dest_id.id)],
+                                                             limit=1)
             if package:
                 if self._check_destination_package(package):
                     return
 
             # Logic only for destination location
-            location = self.env['stock.location'].search(['|', ('name', '=', barcode), ('barcode', '=', barcode)], limit=1)
-            if location and location.search_count([('id', '=', location.id), ('id', 'child_of', self.location_dest_id.ids)]):
+            location = self.env['stock.location'].search(['|', ('name', '=', barcode), ('barcode', '=', barcode)],
+                                                         limit=1)
+            if location and location.search_count(
+                    [('id', '=', location.id), ('id', 'child_of', self.location_dest_id.ids)]):
                 if self._check_destination_location(location):
                     return
         else:
@@ -347,39 +371,47 @@ class StockPicking(models.Model):
                 if parsed_result['type'] == 'weight':
                     product_barcode = parsed_result['base_code']
                     qty = parsed_result['value']
-                else: #product
+                else:  # product
                     product_barcode = parsed_result['code']
                     qty = 1.0
-                product = self.env['product.product'].search(['|', ('barcode', '=', product_barcode), ('default_code', '=', product_barcode)], limit=1)
+                product = self.env['product.product'].search(
+                    ['|', ('barcode', '=', product_barcode), ('default_code', '=', product_barcode)], limit=1)
                 if product:
                     if self._check_product(product, qty):
                         return
 
             if parsed_result['type'] == 'package':
                 if self.move_line_ids:
-                    package_source = self.env['stock.quant.package'].search([('name', '=', parsed_result['code']), ('location_id', 'child_of', self.location_id.id)], limit=1)
+                    package_source = self.env['stock.quant.package'].search(
+                        [('name', '=', parsed_result['code']), ('location_id', 'child_of', self.location_id.id)],
+                        limit=1)
                     if package_source:
                         if self._check_source_package(package_source):
                             return
-                package = self.env['stock.quant.package'].search([('name', '=', parsed_result['code']), '|', ('location_id', '=', False), ('location_id','child_of', self.location_dest_id.id)], limit=1)
+                package = self.env['stock.quant.package'].search(
+                    [('name', '=', parsed_result['code']), '|', ('location_id', '=', False),
+                     ('location_id', 'child_of', self.location_dest_id.id)], limit=1)
                 if package:
                     if self._check_destination_package(package):
                         return
 
             if parsed_result['type'] == 'location':
-                location = self.env['stock.location'].search(['|', ('name', '=', parsed_result['code']), ('barcode', '=', parsed_result['code'])], limit=1)
-                if location and location.search_count([('id', '=', location.id), ('id', 'child_of', self.location_dest_id.ids)]):
+                location = self.env['stock.location'].search(
+                    ['|', ('name', '=', parsed_result['code']), ('barcode', '=', parsed_result['code'])], limit=1)
+                if location and location.search_count(
+                        [('id', '=', location.id), ('id', 'child_of', self.location_dest_id.ids)]):
                     if self._check_destination_location(location):
                         return
 
             product_packaging = self.env['product.packaging'].search([('barcode', '=', parsed_result['code'])], limit=1)
             if product_packaging.product_id:
-                if self._check_product(product_packaging.product_id,product_packaging.qty):
+                if self._check_product(product_packaging.product_id, product_packaging.qty):
                     return
 
         return {'warning': {
             'title': _('Wrong barcode'),
-            'message': _('The barcode "%(barcode)s" doesn\'t correspond to a proper product, package or location.') % {'barcode': barcode}
+            'message': _('The barcode "%(barcode)s" doesn\'t correspond to a proper product, package or location.') % {
+                'barcode': barcode}
         }}
 
     def open_picking(self):
@@ -421,7 +453,7 @@ class StockPicking(models.Model):
                 'nomenclature_id': [self.env.company.nomenclature_id.id],
             }
             return dict(action, target='fullscreen', params=params)
-    
+
     # package-barcode-so-custom
 
     def put_in_pack(self):
@@ -429,28 +461,31 @@ class StockPicking(models.Model):
         if self.state not in ('done', 'cancel'):
             picking_move_lines = self.move_line_ids
             if (
-                not self.picking_type_id.show_reserved
-                and not self.env.context.get('barcode_view')
+                    not self.picking_type_id.show_reserved
+                    and not self.env.context.get('barcode_view')
             ):
                 picking_move_lines = self.move_line_nosuggest_ids
 
             if self.sale_id and self.sale_id.warehouse_id and self.sale_id.warehouse_id and \
-                self.sale_id.warehouse_id.pick_type_id and self.sale_id.warehouse_id.pick_type_id.id and \
-                self.sale_id.warehouse_id.pick_type_id.id == self.picking_type_id.id:
+                    self.sale_id.warehouse_id.pick_type_id and self.sale_id.warehouse_id.pick_type_id.id and \
+                    self.sale_id.warehouse_id.pick_type_id.id == self.picking_type_id.id:
                 move_line_ids = picking_move_lines.filtered(lambda ml:
-                    float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
-                    and not ml.x_package_processed
-                )
+                                                            float_compare(ml.qty_done, 0.0,
+                                                                          precision_rounding=ml.product_uom_id.rounding) > 0
+                                                            and not ml.x_package_processed
+                                                            )
             else:
                 move_line_ids = picking_move_lines.filtered(lambda ml:
-                    float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
-                    and not ml.result_package_id
-                )
+                                                            float_compare(ml.qty_done, 0.0,
+                                                                          precision_rounding=ml.product_uom_id.rounding) > 0
+                                                            and not ml.result_package_id
+                                                            )
 
             if not move_line_ids:
                 move_line_ids = picking_move_lines.filtered(lambda ml: float_compare(ml.product_uom_qty, 0.0,
-                                     precision_rounding=ml.product_uom_id.rounding) > 0 and float_compare(ml.qty_done, 0.0,
-                                     precision_rounding=ml.product_uom_id.rounding) == 0)
+                                                                                     precision_rounding=ml.product_uom_id.rounding) > 0 and float_compare(
+                    ml.qty_done, 0.0,
+                    precision_rounding=ml.product_uom_id.rounding) == 0)
             if move_line_ids:
                 res = self._pre_put_in_pack_hook(move_line_ids)
                 if not res:
@@ -461,16 +496,16 @@ class StockPicking(models.Model):
 
     def _put_in_pack(self, move_line_ids):
         if self.sale_id and self.sale_id.warehouse_id and self.sale_id.warehouse_id and \
-            self.sale_id.warehouse_id.pick_type_id and self.sale_id.warehouse_id.pick_type_id.id and \
-            self.sale_id.warehouse_id.pick_type_id.id == self.picking_type_id.id:
+                self.sale_id.warehouse_id.pick_type_id and self.sale_id.warehouse_id.pick_type_id.id and \
+                self.sale_id.warehouse_id.pick_type_id.id == self.picking_type_id.id:
 
-            sequence = self.env.ref("package_barcode_so_custom.seq_x_package_barcode_so_custom")
+            sequence = self.env.ref("stock_barcode_custom.seq_x_package_barcode_so_custom")
             name = sequence and sequence.next_by_id() or '/'
 
             package = False
             for pick in self:
                 move_lines_to_pack = self.env['stock.move.line']
-                package = self.env['stock.quant.package'].create({'name':name})
+                package = self.env['stock.quant.package'].create({'name': name})
 
                 precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
                 if float_is_zero(move_line_ids[0].qty_done, precision_digits=precision_digits):
@@ -478,10 +513,13 @@ class StockPicking(models.Model):
                         line.qty_done = line.product_uom_qty
 
                 for ml in move_line_ids:
-                    if float_compare(ml.qty_done, ml.product_uom_qty, precision_rounding=ml.product_uom_id.rounding) >= 0:
+                    if float_compare(ml.qty_done, ml.product_uom_qty,
+                                     precision_rounding=ml.product_uom_id.rounding) >= 0:
                         move_lines_to_pack |= ml
                     else:
-                        quantity_left_todo = float_round(ml.product_uom_qty - ml.qty_done, precision_rounding=ml.product_uom_id.rounding, rounding_method='UP')
+                        quantity_left_todo = float_round(ml.product_uom_qty - ml.qty_done,
+                                                         precision_rounding=ml.product_uom_id.rounding,
+                                                         rounding_method='UP')
                         done_to_keep = ml.qty_done
                         new_move_line = ml.copy(
                             default={'product_uom_qty': 0, 'qty_done': ml.qty_done})

@@ -149,6 +149,7 @@ var ClientAction = AbstractAction.extend({
     _getState: function (recordId, state) {
         console.log('_getState');
         console.log(recordId);
+        console.log(state);
         var self = this;
         var def;
         if (state) {
@@ -164,43 +165,42 @@ var ClientAction = AbstractAction.extend({
             });
         }
         return def.then(function (res) {
-            self.currentState = res[0];
-            self.state = res[0].state;
-            console.log('_getState cp');
-            console.log(self.state);
-            console.log(res);
-            if (recordId != self.currentState.id) {
-                self.actionParams.pickingId = self.currentState.id;
-            }
-            self.initialState = $.extend(true, {}, res[0]);
-            self.title += self.initialState.name;
-            self.groups = {
-                'group_stock_multi_locations': self.currentState.group_stock_multi_locations,
-                'group_tracking_owner': self.currentState.group_tracking_owner,
-                'group_tracking_lot': self.currentState.group_tracking_lot,
-                'group_production_lot': self.currentState.group_production_lot,
-                'group_uom': self.currentState.group_uom,
-            };
-            self.show_entire_packs = self.currentState.show_entire_packs;
-            self.requireLotNumber = true;
-            self.suggestions_custom = self.currentState.suggestions_custom;
-            self.picking_ids = self.currentState.picking_ids;
-            console.log('suggestions_custom');
-//            console.log(self);
-            var is_not_ready_to_validate = false;
-            for (let value of self.currentState.move_line_ids) {
-                console.log(value);
-                if (value.product_uom_qty > value.qty_done) {
-                    is_not_ready_to_validate = true;
-                    break;
+                console.log('_getState cp');
+                console.log(res);
+            if (res == undefined || res.length <= 0) {
+                console.log('error getState');
+                console.log(res);
+//                self.trigger_up('exit');
+                return Promise.reject('You are not allowed to check the next pickings');
+            } else {
+                self.currentState = res[0];
+                self.state = res[0].state;
+                if (recordId != self.currentState.id) {
+                    self.actionParams.pickingId = self.currentState.id;
+                }
+                self.initialState = $.extend(true, {}, res[0]);
+                self.title += self.initialState.name;
+                self.groups = {
+                    'group_stock_multi_locations': self.currentState.group_stock_multi_locations,
+                    'group_tracking_owner': self.currentState.group_tracking_owner,
+                    'group_tracking_lot': self.currentState.group_tracking_lot,
+                    'group_production_lot': self.currentState.group_production_lot,
+                    'group_uom': self.currentState.group_uom,
+                };
+                self.show_entire_packs = self.currentState.show_entire_packs;
+                self.requireLotNumber = true;
+                self.suggestions_custom = self.currentState.suggestions_custom;
+                self.picking_ids = self.currentState.picking_ids;
+                console.log('suggestions_custom');
+                var is_not_ready_to_validate = false;
+                for (let value of self.currentState.move_line_ids) {
+                    console.log(value);
+                    if (value.product_uom_qty > value.qty_done) {
+                        is_not_ready_to_validate = true;
+                        break;
+                    }
                 }
             }
-//            Todo: improve this code
-//            if (!is_not_ready_to_validate && self._validate != undefined) {
-//                console.log('Entro validacion');
-//                return self._validate();
-//            }
-
             return res;
         });
     },
@@ -215,8 +215,9 @@ var ClientAction = AbstractAction.extend({
         console.log('_getProductBarcodes');
         var self = this;
         var context = {};
-        if (this.actionParams.pickingId != undefined) {
-            context['pickingId'] = this.actionParams.pickingId;
+        var picking_id = this.actionParams.pickingId || self.currentState.id;
+        if (picking_id != undefined) {
+            context['pickingId'] = picking_id;
         };
         console.log(context);
         return this._rpc({
@@ -1496,10 +1497,11 @@ var ClientAction = AbstractAction.extend({
     _nextPage: function (){
         var self = this;
         console.log('_nextPage');
-        console.log(this.actionParams.picking_ids);
+
         var picking_ids = self.picking_ids || this.actionParams.picking_ids;
         var pickingId = self.currentState.id;
         console.log(pickingId);
+        console.log(picking_ids);
         self.picking_ids = picking_ids;
         self.pickingId = pickingId;
         var line_index = picking_ids.indexOf(pickingId);

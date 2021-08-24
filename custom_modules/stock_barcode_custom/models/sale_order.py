@@ -8,7 +8,6 @@ _logger = logging.getLogger(__name__)
 
 
 class SaleOrderStockBacode(models.Model):
-    
     _inherit = "sale.order"
 
     x_partner_id_x_is_tss = fields.Boolean(string='¿Es TSS?', compute="_compute_get_partner_x_is_tss")
@@ -20,11 +19,11 @@ class SaleOrderStockBacode(models.Model):
     x_weight_total = fields.Float(string="Weight total", compute="_compute_weight_total")
     x_weight_total_uom = fields.Char(string="Weight Uom", compute="_compute_weight_total_uom")
     x_inventory_state = fields.Selection(selection=[
-            ('pick', 'Pick'),
-            ('pack', 'Pack'),
-            ('out', 'Out'),
-            ('done', 'Done')
-        ], string='Status', compute="_compute_number_picks")
+        ('pick', 'Pick'),
+        ('pack', 'Pack'),
+        ('out', 'Out'),
+        ('done', 'Done')
+    ], string='Status', compute="_compute_number_picks")
 
     def _compute_get_partner_x_is_tss(self):
         for record in self:
@@ -34,13 +33,22 @@ class SaleOrderStockBacode(models.Model):
     def _compute_number_picks(self):
         for order in self:
             if order.warehouse_id:
-                order.x_picking_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id)))
-                order.x_pack_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id)))
-                order.x_out_count = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.out_type_id, order.warehouse_id.int_type_id)))
-                
-                pick_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
-                pack_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
-                out_done = len(list(data for data in order.picking_ids if data.picking_type_id in (order.warehouse_id.out_type_id, order.warehouse_id.int_type_id) and data.state in ('done','cancel')))
+                order.x_picking_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id)))
+                order.x_pack_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id)))
+                order.x_out_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.out_type_id, order.warehouse_id.int_type_id)))
+
+                pick_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                     'done', 'cancel')))
+                pack_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                     'done', 'cancel')))
+                out_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                    order.warehouse_id.out_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                    'done', 'cancel')))
                 if pick_done < order.x_picking_count:
                     order.x_inventory_state = 'pick'
                 elif pack_done < order.x_pack_count:
@@ -60,7 +68,8 @@ class SaleOrderStockBacode(models.Model):
 
     def _compute_weight_total(self):
         for order in self:
-            order.x_weight_total = sum(data.product_id.weight * data.product_uom_qty if data.product_id else 0 for data in order.order_line)
+            order.x_weight_total = sum(
+                data.product_id.weight * data.product_uom_qty if data.product_id else 0 for data in order.order_line)
 
     def _compute_weight_total_uom(self):
         for order in self:
@@ -86,35 +95,33 @@ class SaleOrderStockBacode(models.Model):
             }
         else:
             state = 'done'
-            if self.x_inventory_state == 'pick':
-                state = self.x_inventory_state
-                picking_ids = list(data.id for data in self.picking_ids \
-                                                if data.picking_type_id.id in (self.warehouse_id.pick_type_id.id, self.warehouse_id.int_type_id.id))
-            elif self.x_inventory_state == 'pack':
-                state = self.x_inventory_state
-                picking_ids = list(data.id for data in self.picking_ids \
-                                                if data.picking_type_id.id in (self.warehouse_id.pack_type_id.id, self.warehouse_id.int_type_id.id))
-            elif self.x_inventory_state == 'out':
-                state = self.x_inventory_state
-                picking_ids = list(data.id for data in self.picking_ids \
-                                                if data.picking_type_id.id in (self.warehouse_id.out_type_id.id, self.warehouse_id.int_type_id.id))
-
-            data_custom = self.get_suggestions_by_so(picking_ids[::-1])
+            picking_type_ids = []
+            if self.x_inventory_state == 'pick' and self.env.user.x_pick:
+                picking_type_ids = [self.warehouse_id.pick_type_id.id,
+                                    self.warehouse_id.int_type_id.id]
+            if self.x_inventory_state == 'pack' and self.env.user.x_pack:
+                picking_type_ids = [self.warehouse_id.pack_type_id.id,
+                                    self.warehouse_id.int_type_id.id]
+            if self.x_inventory_state == 'out' and self.env.user.x_out:
+                picking_type_ids = [self.warehouse_id.out_type_id.id,
+                                    self.warehouse_id.int_type_id.id]
+            picking_ids = self.env['stock.picking'].search([('origin', '=', self.name),
+                                                            ('picking_type_id', 'in', picking_type_ids),
+                                                            ('state', 'not in', ['done', 'cancel'])])
+            picking_ids = picking_ids.sorted(key=lambda r: r.location_id.name)
+            data_custom = self.env['stock.picking'].get_suggestions_by_so(picking_ids)
             action = self.env.ref('stock_barcode_custom.stock_barcode_picking_client_action_custom').read()[0]
-            params = {
-                'suggestions_custom': data_custom,
-                'model': 'stock.picking',
-                'picking_id': picking_ids[::-1][0],
-                'nomenclature_id': [self.env.company.nomenclature_id.id],
-                'picking_ids': picking_ids,
-                'x_inventory_state': state,
-            }
-            return dict(action, target='fullscreen', params=params)
-
-    def get_suggestions_by_so(self, picking_ids):
-        pickings = self.env['stock.picking']
-        pickings = pickings.search([('id', 'in', picking_ids), ('state', 'not in', ['done', 'cancel'])])
-        return pickings.get_suggestions_by_so(pickings)
+            if len(picking_ids) > 0:
+                params = {
+                    'suggestions_custom': data_custom,
+                    'model': 'stock.picking',
+                    'picking_id': picking_ids[::-1][0].id,
+                    'nomenclature_id': [self.env.company.nomenclature_id.id],
+                    'picking_ids': picking_ids[::-1].ids,
+                    'x_inventory_state': state,
+                }
+                return dict(action, target='fullscreen', params=params)
+            return False
 
     @staticmethod
     def group_by_field(data, group_by):
@@ -132,77 +139,105 @@ class SaleOrderStockBacode(models.Model):
         # This method find the availables stock quants availables to complete a SO.
         # returns a tuple
 
-        group_by = kwargs['group_by'] if 'group_by' in kwargs else 'location_id'
         products = {p.product_id.id: {'qty': p.product_uom_qty, 'product': p.product_id} for p in lines}
         location_domain = []
         second_level_suggested_lines = []
         result = []
         # resupply_products = []
-        quant_domain = [('product_id', 'in', list(products.keys())),
-                        ('quantity', '>', 0)]
+
         stock_quantity = self.env['stock.quant']
         if 'location_domain' in kwargs:
             location_domain = kwargs['location_domain']
 
-        stock_quantity_list = stock_quantity.search_read(quant_domain + location_domain,
-                                                         ['product_id', 'location_id', 'quantity',
-                                                          'reserved_quantity',
-                                                          'inventory_quantity', 'package_id'],
-                                                         order='package_id asc')
-        packaging_ids = {p['x_package'][0]: p for p in
-                         self.env['product.packaging'].search_read([('product_id', 'in', list(products.keys()))],
-                                                                   ['id', 'x_package', 'product_id', 'x_location',
-                                                                    'qty'],
-                                                                   order='qty desc') if p['x_package']}
-        for p in stock_quantity_list:
-            available_qty = p['quantity'] - p['reserved_quantity']
-            requested_qty = products[p['product_id'][0]]['qty']
-            if products[p['product_id'][0]]['qty'] > 0:
-                uom_id = products[p['product_id'][0]]['product'].uom_id.id
-                if p['package_id']:
-                    if p['package_id'][0] in packaging_ids and not packaging_ids[p['package_id'][0]]['x_location']:
+        packages_list = self.env['product.packaging'].search_read(
+            [('product_id', 'in', list(products.keys())), ('x_package', '!=', False)],
+            ['id', 'x_package', 'product_id', 'x_location',
+             'qty'],
+            order='qty desc')
+        packaging_ids = {p['x_package'][0]: p for p in packages_list}
+        quant_domain = [('product_id', 'in', list(products.keys())),
+                        ('quantity', '>', 0)]
+
+        stock_quantity = stock_quantity.search(quant_domain + location_domain)
+
+        # order by location name and product name
+        stock_quantity_list = {sty.id: sty for sty in stock_quantity}
+        for pl in packages_list:
+            if pl['x_package'][0] in stock_quantity_list:
+                sq = stock_quantity_list[pl['x_package'][0]]
+                available_qty = sq.quantity - sq.reserved_quantity
+                requested_qty = products[sq.product_id.id]['qty']
+                pack_size = pl['qty'] if float(pl['qty']) != float(0)else 1.0
+                packs_requested = SaleOrderStockBacode._get_available_per_pack(
+                    requested_qty, available_qty, pack_size)
+                if packs_requested > 0:
+                    result.append({
+                        'product_id': (sq.product_id.id, sq.product_id.name),
+                        'uom_id': sq.product_id.uom_id.id,
+                        'package_id': (sq.package_id.id, sq.package_id.name),
+                        'location_id': pl['x_location'][0],
+                        'qty': packs_requested,
+                        'packages_count': packs_requested / pack_size,
+                        'pack_size': pack_size,
+                    })
+                    products[sq.product_id.id]['qty'] -= packs_requested
+                    sq.reserved_quantity += packs_requested
+
+        for sq in stock_quantity:
+            available_qty = sq.quantity - sq.reserved_quantity
+            requested_qty = products[sq.product_id.id]['qty']
+            if products[sq.product_id.id]['qty'] > 0:
+                uom_id = sq.product_id.uom_id.id
+                if sq.package_id:
+                    if sq.package_id.id in packaging_ids and not packaging_ids[sq.package_id.id]['x_location']:
                         raise UserError(
                             'El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
-                                p['package_id'][1], p['product_id'][1]))
+                                sq.package_id.name, sq.product_id.name))
+                    pack_qty = 1.0
+                    if sq.package_id.id in packaging_ids and float(packaging_ids[sq.package_id.id]['qty']) != float(0):
+                        pack_qty = packaging_ids[sq.package_id.id]['qty']
+                    else:
+                        _logger.info("\n\n El producto {} no tiene el tipo de paquete {} configurado \n\n".format(
+                            sq.product_id.name, sq.package_id.name))
                     packs_requested = SaleOrderStockBacode._get_available_per_pack(
-                        requested_qty, available_qty, packaging_ids[p['package_id'][0]]['qty'])
+                        requested_qty, available_qty, pack_qty)
                     if packs_requested > 0:
                         result.append({
-                            'product_id': p['product_id'],
+                            'product_id': (sq.product_id.id, sq.product_id.name),
                             'uom_id': uom_id,
-                            'package_id': p['package_id'],
-                            'location_id': packaging_ids[p['package_id'][0]]['x_location'][0],
+                            'package_id': (sq.package_id.id, sq.package_id.name),
+                            'location_id': sq.location_id.id,
                             'qty': packs_requested,
-                            'packages_count': packs_requested / packaging_ids[p['package_id'][0]]['qty'],
-                            'pack_size': packaging_ids[p['package_id'][0]]['qty'],
+                            'packages_count': packs_requested / pack_qty,
+                            'pack_size': pack_qty,
                         })
-                        products[p['product_id'][0]]['qty'] -= packs_requested
+                        products[sq.product_id.id]['qty'] -= packs_requested
                         if available_qty - packs_requested > 0:
                             second_level_suggested_lines.append({
-                                'product_id': p['product_id'],
+                                'product_id': (sq.product_id.id, sq.product_id.name),
                                 'uom_id': uom_id,
                                 'package_id': False,
-                                'location_id': packaging_ids[p['package_id'][0]]['x_location'][0],
+                                'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
                                 'available_qty': available_qty - packs_requested,
                             })
                     elif available_qty > 0:
                         second_level_suggested_lines.append({
-                            'product_id': p['product_id'],
+                            'product_id': (sq.product_id.id, sq.product_id.name),
                             'uom_id': uom_id,
                             'package_id': False,
-                            'location_id': packaging_ids[p['package_id'][0]]['x_location'][0],
+                            'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
                             'available_qty': available_qty,
                         })
                 elif available_qty > 0:
                     qty = requested_qty if available_qty > requested_qty else available_qty
                     result.append({
-                        'product_id': p['product_id'],
+                        'product_id': (sq.product_id.id, sq.product_id.name),
                         'uom_id': uom_id,
-                        'package_id': p['package_id'],
-                        'location_id': p['location_id'][0],
+                        'package_id': False,
+                        'location_id': sq.location_id.id,
                         'qty': qty,
                     })
-                    products[p['product_id'][0]]['qty'] -= qty
+                    products[sq.product_id.id]['qty'] -= qty
 
         products_missed = [key for key, val in products.items() if val['qty'] > 0]
 
@@ -217,27 +252,13 @@ class SaleOrderStockBacode(models.Model):
                         p['qty'] = qty
                         result.append(p)
                         products[p_id]['qty'] -= qty
-                # elif products[p_id]['qty'] > 0:
-                #     packs_to_suppy = self.env['product.packaging'].search([('product_id', '=', p_id)], order='qty desc')
-                #     for pack in packs_to_suppy:
-                #         qty_required = SaleOrderStockBacode._get_available_per_pack(
-                #             products[p_id]['qty'], 1000000, pack.qty)
-                #         resupply_products.append({
-                #                 'product_id': p_id,
-                #                 'uom_id': pack.product_id.uom_id.id,
-                #                 'package_id': pack.id,
-                #                 'location_id': pack.x_location.id,
-                #                 'qty': qty_required,
-                #                 're_supply': True,
-                #         })
-                #         products[p_id]['qty'] -= qty_required
 
         products_missed = [key for key, val in products.items() if val['qty'] > 0]
 
         if len(products_missed) > 0:
-            _logger.debug(
+            _logger.info(
                 "Called: {} products that are not available: {}".format('products_pick_finder', products_missed))
-        _logger.debug("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
+        _logger.info("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
         return result, products_missed
 
     def action_confirm(self):

@@ -42,7 +42,7 @@
 
     <t t-name="stock_barcode_picking_template">
         <div class="o_custom_suggestion_content">
-            <t t-if="picking">
+            <t t-if="show_pickings">
                 <div class="content-boxes">
                     <div class="o_kanban_view o_kanban_ungrouped simple-col">
                         <t t-foreach="picking" t-as="subsubline">
@@ -80,7 +80,10 @@
                                                 </div>
                                                 <div t-if="subsubline.package_id" class="col-12">
                                                     <!-- <span t-esc="subsubline.package_id"/> -->
-                                                    <span class="o_package_name" t-esc="subsubline.package_name"></span>
+                                                    <span><strong>Paquete:</strong> <span class="o_package_name" t-esc="subsubline.package_name"></span></span>
+                                                </div>
+                                                <div t-if="subsubline.package_id" class="col-12">
+                                                    <!-- <span t-esc="subsubline.package_id"/> -->
                                                     <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
                                                 </div>
                                             </div>
