@@ -32,7 +32,9 @@ var LinesWidget = Widget.extend({
         this.requireLotNumber = parent.requireLotNumber;
         this.picking_ids = parent.picking_ids || parent.actionParams.picking_ids;
         this.picking_id = parent.pickingId || parent.actionParams.pickingId;
-        this.suggestions_custom = parent.suggestions_custom[this.picking_id];
+        if (parent.suggestions_custom != undefined) {
+            this.suggestions_custom = parent.suggestions_custom[this.picking_id];
+        }
 
     },
 
@@ -260,7 +262,7 @@ var LinesWidget = Widget.extend({
         console.log(this.picking_ids);
         const suggestion_index = this.picking_ids.indexOf(this.picking_id);
         var $pageSummary = $(QWeb.render('stock_barcode_picking_template', {
-            picking: this.suggestions_custom,
+            picking: this.suggestions_custom || [],
             locationName: this.page.location_name,
             locationDestName: this.page.location_dest_name,
             nbPages: this.nbPages,

@@ -235,7 +235,7 @@ class SaleOrderStockBacode(models.Model):
             _logger.debug(
                 "Called: {} products that are not available: {}".format('products_pick_finder', products_missed))
         _logger.debug("Called: {} and the sugested lines generated: {}".format('products_pick_finder', result))
-        return SaleOrderStockBacode.group_by_field(result, group_by), products_missed
+        return result, products_missed
 
     def action_confirm(self):
         """ This method extends the actual behavior adding an automatic option to create
@@ -259,7 +259,7 @@ class SaleOrderStockBacode(models.Model):
             root_ids.append(picking_type.warehouse_id.view_location_id.id)
         custom_domain = [('location_id.x_root_location_id', 'in', root_ids)]
 
-        lines_to_compute, missed_products = self.products_pick_finder(self.order_line, location_domain=custom_domain)
+        move_lines, missed_products = self.products_pick_finder(self.order_line, location_domain=custom_domain)
 
         if len(missed_products) > 0:
             ssc = self.env['stock.scheduler.compute']
@@ -269,21 +269,19 @@ class SaleOrderStockBacode(models.Model):
         move_ref = self.env['stock.move'].search([
             ('product_id', '=', self.order_line.move_ids[0].product_id.id),
             ('origin', '=', self.order_line.move_ids[0].origin)], limit=1)
-
-        for location_id, move_lines in lines_to_compute.items():
-            if location_id != stock_id:
-                picking_id = self.create_stock_piking_material_delivery(move_ref, location_id, stock_id)
-                for m_line in move_lines:
-                    if m_line['package_id']:
-                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
-                                                  m_line['product_id'][0],
-                                                  m_line['uom_id'], m_line['qty'],
-                                                  location_id, stock_id, m_line['package_id'][0])
-                    else:
-                        self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
-                                                  m_line['product_id'][0],
-                                                  m_line['uom_id'], m_line['qty'],
-                                                  location_id, stock_id)
+        for m_line in move_lines:
+            if m_line['location_id'] != stock_id:
+                picking_id = self.create_stock_piking_material_delivery(move_ref, m_line['location_id'], stock_id)
+                if m_line['package_id']:
+                    self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
+                                              m_line['product_id'][0],
+                                              m_line['uom_id'], m_line['qty'],
+                                              m_line['location_id'], stock_id, m_line['package_id'][0])
+                else:
+                    self._generate_move_lines(move_ref, picking_id, m_line['product_id'][1],
+                                              m_line['product_id'][0],
+                                              m_line['uom_id'], m_line['qty'],
+                                              m_line['location_id'], stock_id)
 
                 picking_id.action_confirm()
                 picking_id.action_assign()

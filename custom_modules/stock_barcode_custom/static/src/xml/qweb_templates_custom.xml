@@ -62,7 +62,7 @@
                                             <div class="col-12">
                                                 <span t-esc="subsubline.product_name" />
                                             </div>
-                                            <div t-if="subsubline.product_x_manufacturer" class="col-12">
+                                            <div t-if="subsubline.product_x_manufacturer" class="col-4">
                                                 <span><strong>Ref Fabricante:</strong> <span t-esc="subsubline.product_x_manufacturer" /></span>
                                             </div>
                                         </div>

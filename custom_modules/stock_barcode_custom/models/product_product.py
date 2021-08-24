@@ -9,12 +9,25 @@ class Product(models.Model):
 
     @api.model
     def get_all_products_by_barcode(self, context=None):
+        if context is None:
+            context = {}
+        product_domain = [('barcode', '!=', None), ('type', '!=', 'service')]
+        packagin_domain = [('barcode', '!=', None), ('product_id', '!=', None)]
+        if 'pickingId' in context.keys():
+            picking_id = self.env['stock.picking'].search([('id', '=', context['pickingId'])])
+            # Check if the movement is pick to pack
+            if picking_id.origin and picking_id.sale_id and picking_id.picking_type_id and \
+                    picking_id.sale_id.warehouse_id.pick_type_id.id == picking_id.picking_type_id.id:
+                product_ids = list(set(operations.product_id.id for operations in picking_id.move_ids_without_package))
+                product_domain.append(('id', 'in', product_ids))
+                packagin_domain.append(('product_id.id', 'in', product_ids))
+
         products = self.env['product.product'].search_read(
-            [('barcode', '!=', None), ('type', '!=', 'service')],
+            product_domain,
             ['barcode', 'display_name', 'uom_id', 'tracking']
         )
         packagings = self.env['product.packaging'].search_read(
-            [('barcode', '!=', None), ('product_id', '!=', None)],
+            packagin_domain,
             ['id', 'barcode', 'product_id', 'qty', 'x_package', 'x_location']
         )
         # for each packaging, grab the corresponding product data

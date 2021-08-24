@@ -134,7 +134,8 @@ var ClientAction = AbstractAction.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
+    _validate: function () {
+    },
     /**
      * Make an rpc to get the state and afterwards set `this.currentState` and `this.initialState`.
      * It also completes `this.title`. If the `state` argument is passed, use it instead of doing
@@ -182,7 +183,21 @@ var ClientAction = AbstractAction.extend({
             self.requireLotNumber = true;
             self.suggestions_custom = self.currentState.suggestions_custom;
             self.picking_ids = self.currentState.picking_ids;
-            self.has_origin = self.currentState.origin;
+            console.log('suggestions_custom');
+//            console.log(self);
+            var is_not_ready_to_validate = false;
+            for (let value of self.currentState.move_line_ids) {
+                console.log(value);
+                if (value.product_uom_qty > value.qty_done) {
+                    is_not_ready_to_validate = true;
+                    break;
+                }
+            }
+//            Todo: improve this code
+            if (!is_not_ready_to_validate && self._validate != undefined) {
+                console.log('Entro validacion');
+                return self._validate();
+            }
 
             return res;
         });
@@ -197,21 +212,20 @@ var ClientAction = AbstractAction.extend({
     _getProductBarcodes: function () {
         console.log('_getProductBarcodes');
         var self = this;
-        if (cache.productsByBarcode) {
-            self.productsByBarcode = cache.productsByBarcode;
-            return $.when();
-        }
-
+        var context = {};
+        if (this.actionParams.pickingId != undefined) {
+            context['pickingId'] = this.actionParams.pickingId;
+        };
+        console.log(context);
         return this._rpc({
             'model': 'product.product',
             'method': 'get_all_products_by_barcode',
-            'args': [],
+            'args': [context],
         }).then(function (res) {
             self.productsByBarcode = res;
-            cache.productsByBarcode = res;
+//            cache.productsByBarcode = res;
         });
     },
-
     _getProductByBarcode: async function (barcode) {
         console.log('_getProductByBarcode');
         var self = this;
@@ -968,15 +982,18 @@ var ClientAction = AbstractAction.extend({
                     linesActions.push([this.linesWidget.addProduct, [res.lineDescription, this.actionParams.model]]);
                 }
             } else {
+                console.log('entro 1');
                 if (product.tracking === 'none' || !self.requireLotNumber) {
                     linesActions.push([this.linesWidget.incrementProduct, [res.id || res.virtualId, product.qty || 1, this.actionParams.model]]);
                 } else {
                     linesActions.push([this.linesWidget.incrementProduct, [res.id || res.virtualId, 0, this.actionParams.model]]);
                 }
             }
+            this._reload_after_scan(res.linesActions);
             this.scannedLines.push(res.id || res.virtualId);
-            return Promise.resolve({linesActions: linesActions});
+            return Promise.resolve({linesActions: res.linesActions});
         } else {
+            console.log('entro 2');
             var success = function (res) {
                 return Promise.resolve({linesActions: res.linesActions});
             };
@@ -1002,6 +1019,7 @@ var ClientAction = AbstractAction.extend({
                     return Promise.reject(errorMessage);
                 }
             };
+            console.log('entro 5');
             return self._step_lot(barcode, linesActions).then(success, function () {
                 return self._step_package(barcode, linesActions).then(success, fail);
             });
@@ -1437,6 +1455,19 @@ var ClientAction = AbstractAction.extend({
         }
     },
 
+    _reload_after_scan: function(lines) {
+        console.log('_reload_after_scan');
+        console.log(lines);
+        var self = this;
+
+        return this._save().then(function () {
+            console.log(self);
+            console.log('despues de save _reload_after_scan');
+            var prom =  self._reloadLineWidget(self.currentPageIndex);
+            self._endBarcodeFlow();
+            return prom;
+        });
+    },
     /**
      * Helper used when we want to go the next page. It calls `this._endBarcodeFlow`.
      *
@@ -1445,9 +1476,12 @@ var ClientAction = AbstractAction.extend({
     _nextPage: function (){
         var self = this;
         console.log('_nextPage');
+        console.log(this.actionParams.picking_ids);
+        var picking_ids = self.picking_ids || this.actionParams.picking_ids;
         var pickingId = self.currentState.id;
-        var line_index = self.picking_ids.indexOf(pickingId);
-        console.log(self.picking_ids);
+        console.log(pickingId);
+        self.picking_ids = picking_ids;
+        var line_index = picking_ids.indexOf(pickingId);
         if (self.picking_ids.length > 1 && line_index >= 0) {
             if ((line_index + 2) > self.picking_ids.length) {
                 self.pickingId = self.picking_ids[0];
@@ -1489,8 +1523,11 @@ var ClientAction = AbstractAction.extend({
     _previousPage: function () {
         var self = this;
         console.log('_previousPage');
+        var picking_ids = self.picking_ids || this.actionParams.picking_ids;
         var pickingId = self.currentState.id;
-        var line_index = self.picking_ids.indexOf(pickingId);
+        console.log(pickingId);
+        var line_index = picking_ids.indexOf(pickingId);
+        self.picking_ids = picking_ids;
         if (self.picking_ids.length > 1 && line_index >= 0) {
             if ((line_index - 1) < 0 ) {
                 self.pickingId = self.picking_ids[self.picking_ids.length - 1];
