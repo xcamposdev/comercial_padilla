@@ -35,7 +35,7 @@ var LinesWidget = Widget.extend({
         if (parent.suggestions_custom != undefined) {
             this.suggestions_custom = parent.suggestions_custom[this.picking_id];
         }
-
+        this.state = parent.state;
     },
 
     start: function () {

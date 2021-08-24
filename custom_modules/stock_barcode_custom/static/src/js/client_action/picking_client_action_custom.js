@@ -123,6 +123,12 @@ var PickingClientAction = ClientAction.extend({
     _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id, owner_id) {
         var virtualId = this._getNewVirtualId();
         var currentPage = this.pages[this.currentPageIndex];
+        var location_dest_id = currentPage.location_dest_id;
+        var location_display_name = currentPage.location_dest_name;
+        if (!this.has_origin && product.x_location != undefined && this.currentState.picking_type_code == "internal") {
+            location_dest_id = product.x_location[0];
+            location_display_name = product.x_location[1];
+        }
         var newLine = {
             'picking_id': this.currentState.id,
             'product_id': {
@@ -145,11 +151,13 @@ var PickingClientAction = ClientAction.extend({
                 'display_name': currentPage.location_dest_name,
             },
             'package_id': package_id,
-            'result_package_id': result_package_id,
+            'result_package_id':  (product.x_package != undefined && this.currentState.picking_type_code == "internal") ? [product.x_package[0], product.x_package[1]] : result_package_id,
             'owner_id': owner_id,
             'state': 'assigned',
             'reference': this.name,
             'virtual_id': virtualId,
+            'package_size': package_id !== undefined || package_id !== null ? qty_done : false,
+            'packages_count': package_id !== undefined || package_id !== null ? 1 : false,
         };
         return newLine;
     },

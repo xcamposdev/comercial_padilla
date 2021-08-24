@@ -15,7 +15,7 @@
         <div class="o_barcode_header navbar navbar-expand navbar-dark bg-beta" t-att-style="style">
             <nav class="navbar-nav mr-auto">
                 <a tabindex="" class="nav-link o_exit mr-4"><i class="fa fa-chevron-left"/></a>
-                <span class="o_title navbar-text text-white"><t t-esc="widget.title"></t></span>
+                <span class="o_hidden o_title navbar-text text-white"><t t-esc="widget.title"></t></span>
             </nav>
             <nav class="navbar-nav">
                 <a tabindex="" class="nav-link o_show_settings"><i class="fa fa-bars"/></a>
@@ -30,6 +30,7 @@
         <div class="o_barcode_lines list-group flex-grow-1 d-block bg-100 position-relative"></div>
 
         <div t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="o_barcode_control d-flex">
+            <button t-if="widget.groups.group_tracking_lot and widget.model == 'stock.picking' and widget.state == 'pack'" class="btn btn-secondary text-uppercase o_put_in_pack"><i class="fa fa-cube mr-1"/> Put In Pack</button>
             <button class="btn btn-secondary text-uppercase o_add_line"><i class="fa fa-plus mr-1"/> Add product</button>
             <button class="btn btn-secondary text-uppercase o_validate_page"><i class="fa fa-check mr-1"/> Validate</button>
         </div>
@@ -46,41 +47,48 @@
                     <div class="o_kanban_view o_kanban_ungrouped simple-col">
                         <t t-foreach="picking" t-as="subsubline">
                             <div class="o_kanban_record">
-                                <div class="o_kanban_image o_width_128">
-                                    <t t-if="subsubline.product_image">
-                                        <img t-attf-src="data:image/png;base64,{{subsubline.product_image}}" class="o_image_64_contain o_height_128 o_width_128"/>
-                                    </t>
-                                    <t t-else="">
-                                        <img src="/web/static/src/img/placeholder.png" class="o_image_64_contain o_height_128 o_width_128"/>
-                                    </t>
+                                <div class="row">
+                                    <div class="col-12 o_kanban_image o_width_200">
+                                        <t t-if="subsubline.product_image">
+                                            <img t-attf-src="data:image/png;base64,{{subsubline.product_image}}" class="o_image_64_contain o_height_200 o_width_200"/>
+                                        </t>
+                                        <t t-else="">
+                                            <img src="/web/static/src/img/placeholder.png" class="o_image_64_contain o_height_200 o_width_200"/>
+                                        </t>
+                                    </div>
                                 </div>
-                                <div class="oe_kanban_details o_padding_left_142">
-                                    <div t-att-data-id="subsubline.product_id" t-att-data-barcode="subsubline.product_id">
-                                        <h3><span t-esc="subsubline.location_name" /></h3>
-                                        <!-- <span class="o_hide" t-esc="subsubline.product_id" /> -->
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <span t-esc="subsubline.product_name" />
+                                <div class="row">
+                                    <div class="col-12 oe_kanban_details font_size_20">
+                                        <div t-att-data-id="subsubline.product_id" t-att-data-barcode="subsubline.product_id">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h3 class="font_size_30"><strong><span t-esc="subsubline.location_name" /></strong></h3>
+                                                </div>
+                                                <div class="col-12">
+                                                    <span><strong>Producto:</strong> <span t-esc="subsubline.product_name" /></span>
+                                                </div>
+                                                <div t-if="subsubline.product_x_manufacturer" class="col-12">
+                                                    <span><strong>Ref Fabricante:</strong> <span t-esc="subsubline.product_x_manufacturer" /></span>
+                                                </div>
                                             </div>
-                                            <div t-if="subsubline.product_x_manufacturer" class="col-4">
-                                                <span><strong>Ref Fabricante:</strong> <span t-esc="subsubline.product_x_manufacturer" /></span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div t-if="subsubline.product_description_picking" class="col-12">
-                                                <span><strong>Descripción:</strong> <span t-esc="subsubline.product_description_picking" /></span>
-                                            </div>
-                                            <div t-if="!subsubline.package_id"  class="col-6">
-                                                <span><strong>Cantidad:</strong> <span class="o_line_qty" t-esc="subsubline.qty" /></span>
-                                            </div>
-                                            <div t-if="subsubline.package_id" class="col-6">
-                                                <span t-esc="subsubline.package_id"/>
-                                                <span class="o_package_name" t-esc="subsubline.package_name"></span>
-                                                <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
+                                            <div class="row">
+                                                <div t-if="subsubline.product_description_picking" class="col-12">
+                                                    <span><strong>Descripción:</strong> <span t-esc="subsubline.product_description_picking" /></span>
+                                                </div>
+                                                <div t-if="!subsubline.package_id"  class="col-12">
+                                                    <span><strong>Cantidad:</strong> <span class="o_line_qty" t-esc="subsubline.qty" /></span>
+                                                </div>
+                                                <div t-if="subsubline.package_id" class="col-12">
+                                                    <!-- <span t-esc="subsubline.package_id"/> -->
+                                                    <span class="o_package_name" t-esc="subsubline.package_name"></span>
+                                                    <span><strong>Cantidad Paquete:</strong> <span class="o_package_count" t-esc="subsubline.packages_count"></span></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                
                             </div>
                         </t>
                     </div>
