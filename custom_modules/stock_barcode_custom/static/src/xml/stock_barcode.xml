@@ -37,7 +37,7 @@
                         <button class="button_inventory btn btn-block btn-primary">Inventory Adjustments</button>
                     </div>
                 </div>
-                <div class="row mt-4">
+                <div class="row">
                     <div class="col">
                         <button class="button_sale btn btn-block btn-primary">Prepare an sale order</button>
                     </div>

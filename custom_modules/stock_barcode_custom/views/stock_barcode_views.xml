@@ -75,7 +75,7 @@
         <field name="mode">primary</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile oe_background_grey o_emphasize_colors" create="0">
+            <kanban class="o_barcode_custom o_kanban_mobile oe_background_grey o_emphasize_colors" create="0">
                 <field name="display_name"/>
                 <field name="color"/>
                 <field name="count_picking_ready"/>
@@ -146,13 +146,13 @@
 
     <!-- show list of sale ordes -->
 
-    <record id="sale_order_kanban" model="ir.ui.view">
+    <record id="sale_order_kanban_custom" model="ir.ui.view">
         <field name="name">sale.order.kanban</field>
         <field name="model">sale.order</field>
         <field name="mode">primary</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" create="false">
+            <kanban class="o_kanban_mobile o_barcode_custom" create="false">
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="amount_total"/>
@@ -166,14 +166,19 @@
                 <field name="x_unit_total"/>
                 <field name="x_weight_total"/>
                 <field name="commitment_date"/>
+                <field name="x_weight_total_uom"/>
 
                 <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_card oe_kanban_global_click">
-                            <div class="o_kanban_record_top mb16">
+                            <div class="o_kanban_record_top mb8">
                                 <div class="o_kanban_record_headings mt4">
-                                    <strong class="o_kanban_record_title"><span><t t-esc="record.name.value"/></span></strong>
+                                    <button style="padding: 0px 0px;" class="btn btn-link o_kanban_record_title" name="open_picking_client_action"
+                                        type="object">
+                                        <span><t t-esc="record.name.value"/></span>
+                                    </button>
+                                    <!-- <strong class="o_kanban_record_title"><span><t t-esc="record.name.value"/></span></strong> -->
                                 </div>
                                 <t t-if="record.x_partner_id_x_is_tss.raw_value == true">
                                   <strong>TSS</strong>
@@ -185,13 +190,21 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12">
+                                <div class="col-6">
                                     <strong>Delivery date:</strong> <span t-esc="record.commitment_date.value" />
+                                </div>
+                                <div class="col-6">
+                                    <strong>
+                                        <field name="x_inventory_state" widget="label_selection" options="{'classes': {'pick': 'primary', 'pack': 'secondary', 'out': 'success'}}"/>
+                                    </strong>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-6">
-                                    <strong>Nro of picks:</strong> <span t-esc="record.x_picking_count.value" />
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pick'">Nro of picks:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pack'">Nro of packs:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'out'">Nro of out:</strong>
+                                    <span t-esc="record.x_picking_count.value" />
                                 </div>
                                 <div class="col-6">
                                     <strong>Nro of items:</strong> <span t-esc="record.x_item_count.value" />
@@ -202,7 +215,7 @@
                                     <strong>Nro of units:</strong> <span t-esc="record.x_unit_total.value" />
                                 </div>
                                 <div class="col-6">
-                                    <strong>Weight total:</strong> <span t-esc="record.x_weight_total.value" />
+                                    <strong>Weight total:</strong> <span t-esc="record.x_weight_total.value" /> <span t-esc="record.x_weight_total_uom.value"/>
                                 </div>
                             </div>
                         </div>
@@ -217,7 +230,7 @@
         <field name="res_model">sale.order</field>
         <field name="view_mode">kanban,form</field>
         <field name="domain">[('state', 'in', [('done')])]</field>
-        <field name="view_id" ref="sale_order_kanban"/>
+        <field name="view_id" ref="sale_order_kanban_custom"/>
         <field name="context">{
             'form_view_initial_mode': 'edit',
             'force_detailed_view': True,

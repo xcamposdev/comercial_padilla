@@ -1,8 +1,77 @@
+.o_custom_suggestion_content {
+     .content-boxes {
+         border: 1px solid #757575;
+         padding: 4px;
+         border-radius: 4px;
+         min-height: 255px;
+         margin-bottom: 5px;
+      }
+      .simple-col{
+         box-shadow: 0px 2px 3px 1px rgba(150, 150, 150, 0.51);
+         border-radius: 2px;
+         padding: 10px 12px;
+         margin-bottom: 5px;
+         position: relative;
+      }
+      .simple-col h4{
+         margin: 0;
+      }
+      .simple-col h3 {
+         font-size: 25px;
+         margin: 0;
+         line-height: 1;
+         padding-bottom: 3px;
+      }
+      .simple-col p{
+         margin: 0;
+         font-size: 14px;
+      }
+      .simple-col .text-floating{
+         position: absolute;
+         right: 5px;
+         bottom: 8px;
+         font-size: 15px;
+         margin: 0;
+      }
+      .info-wrap{
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         font-size: 12px;
+         max-width: 230px;
+      }
+      .info-wrap span{
+         display: inline-block;
+         padding-right: 5px;
+      }
+      .simple-col .icon-img{
+         vertical-align: bottom;
+         padding-right: 3px;
+      }
+      .float-ball{
+         position: fixed;
+         right: 10px;
+         top: 50px;
+         border: 1px solid #000;
+         background-color: #fff;
+         font-weight: 700;
+         min-width: 35px;
+         min-height: 35px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         border-radius: 50%;
+         padding: 7px;
+         line-height: 1;
+         z-index: 5;
+      }
+}
 .o_barcode_client_action {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: white;
+
+
 
     .o_invisible {
         visibility: hidden;

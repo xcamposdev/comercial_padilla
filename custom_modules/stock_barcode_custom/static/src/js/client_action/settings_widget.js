@@ -12,6 +12,7 @@ var SettingsWidget = Widget.extend({
         'click .o_print_delivery_slip': '_onClickPrintDeliverySlip',
         'click .o_print_barcodes_zpl': '_onClickPrintBarcodesZpl',
         'click .o_print_barcodes_pdf': '_onClickPrintBarcodesPdf',
+        "click .o_print_bultos_pdf": "onClickBultosPDF",
         'click .o_print_inventory': '_onClickPrintInventory',
         'click .o_scrap': '_onClickScrap',
     },
@@ -96,6 +97,17 @@ var SettingsWidget = Widget.extend({
      _onClickPrintBarcodesPdf: function (ev) {
         ev.stopPropagation();
         this.trigger_up('picking_print_barcodes_pdf');
+    },
+
+    /**
+     * Handles the click on the `print bultos pdf` button. 
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    onClickBultosPDF: function (ev) {
+        ev.stopPropagation();
+        this.trigger_up('picking_print_bultos_pdf');
     },
 
     /**
