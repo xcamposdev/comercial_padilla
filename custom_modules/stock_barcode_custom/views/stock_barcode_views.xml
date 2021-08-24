@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Main menu -->
+
+    <record id="stock_barcode_action_main_menu" model="ir.actions.client">
+        <field name="name">Barcode</field>
+        <field name="tag">stock_barcode_main_menu</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <menuitem
+        id="stock_barcode_menu"
+        action="stock_barcode_action_main_menu"
+        icon="fa-barcode"
+        web_icon="stock_barcode,static/description/icon.png"
+        sequence="50"
+        groups="stock.group_stock_user" />
+
+
+    <!-- Actions -->
+
+    <record id="stock_inventory_action_new_inventory" model="ir.actions.act_window">
+        <field name="name">New Inventory</field>
+        <field name="res_model">stock.inventory</field>
+        <field name="view_mode">form</field>
+        <field name="context">{
+            'default_filter': 'partial',
+            'form_view_initial_mode': 'edit',
+        }</field>
+    </record>
+
+    <record id="stock_picking_action_form" model="ir.actions.act_window">
+        <field name="name">Picking</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">form</field>
+        <field name="context">{
+            'form_view_initial_mode': 'edit',
+            'force_detailed_view': True,
+        }</field>
+    </record>
+
+    <record id="stock_picking_kanban" model="ir.ui.view">
+        <field name="name">stock.barcode.picking.kanban</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.stock_picking_kanban"/>
+        <field name="mode">primary</field>
+        <!--High priority to not be the standard view of pickings in inventory app-->
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban[hasclass('o_kanban_mobile')]" position="attributes">
+                <attribute name="create">false</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock_picking_action_kanban" model="ir.actions.act_window">
+        <field name="name">Operations</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="view_id" ref="stock_barcode_custom.stock_picking_kanban"/>
+        <field name="context">{
+            'form_view_initial_mode': 'edit',
+            'contact_display': 'partner_address',
+            'search_default_available': 1,
+            'force_detailed_view': True
+        }</field>
+    </record>
+
+    <!-- Kanban view to access operations by operation type -->
+
+    <record id="stock_picking_type_kanban" model="ir.ui.view">
+        <field name="name">stock.picking.type.kanban</field>
+        <field name="model">stock.picking.type</field>
+        <field name="mode">primary</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <kanban class="o_barcode_custom o_kanban_mobile oe_background_grey o_emphasize_colors" create="0">
+                <field name="display_name"/>
+                <field name="color"/>
+                <field name="count_picking_ready"/>
+                <field name="code"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-if="['incoming', 'outgoing', 'internal'].indexOf(record.code.raw_value) > -1" t-attf-class="oe_kanban_card #{!selection_mode ? kanban_color(record.color.raw_value) : ''} oe_kanban_global_click">
+                            <span class="oe_kanban_color_help" t-attf-title="In #{kanban_getcolorname(record.color.raw_value)}" role="img" t-attf-aria-label="In #{kanban_getcolorname(record.color.raw_value)}"/>
+                                <div class="o_kanban_card_header">
+                                        <div class="o_primary o_kanban_record_title">
+                                            <field name="name"/>
+                                        </div>
+                                        <div class="o_secondary">
+                                            <field name="warehouse_id" readonly="1"/>
+                                        </div>
+                                </div>
+                            <div class="container o_kanban_card_content o_kanban_button">
+                                <div class="row text-muted">
+                                    <button class="btn btn-primary" name="get_action_picking_tree_ready_kanban" type="object">
+                                        <span t-if="record.code.raw_value =='incoming'"><t t-esc="record.count_picking_ready.value"/> To Process</span>
+                                        <span t-if="record.code.raw_value =='outgoing'"><t t-esc="record.count_picking_ready.value"/> To Process</span>
+                                        <span t-if="record.code.raw_value =='internal'"><t t-esc="record.count_picking_ready.value"/> To Process</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="stock_picking_type_action_kanban" model="ir.actions.act_window">
+        <field name="name">Operations</field>
+        <field name="res_model">stock.picking.type</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="domain">[('code', 'in', ('incoming', 'outgoing', 'internal'))]</field>
+        <field name="view_id" ref="stock_picking_type_kanban"/>
+        <field name="context">{
+            'form_view_initial_mode': 'edit',
+            'force_detailed_view': True,
+        }</field>
+    </record>
+
+
+    <!-- Editable list to set product barcodes -->
+
+    <record id="product_view_list_barcodes" model="ir.ui.view">
+        <field name="name">product.list.barcodes</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <tree string="Product Barcodes" editable="top" create="false" delete="false">
+                <field name="name" readonly="1"/>
+                <field name="code" readonly="1"/>
+                <field name="barcode"/>
+                <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="product_action_barcodes" model="ir.actions.act_window">
+        <field name="name">Product Barcodes</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="product_view_list_barcodes"/>
+    </record>
+
+
+    <!-- show list of sale ordes -->
+
+    <record id="sale_order_kanban_custom" model="ir.ui.view">
+        <field name="name">sale.order.kanban</field>
+        <field name="model">sale.order</field>
+        <field name="mode">primary</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile o_barcode_custom" create="false">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="amount_total"/>
+                <field name="state"/>
+                <field name="currency_id"/>
+                <field name="activity_state"/>
+
+                <field name="x_partner_id_x_is_tss"/>
+                <field name="x_picking_count"/>
+                <field name="x_item_count"/>
+                <field name="x_unit_total"/>
+                <field name="x_weight_total"/>
+                <field name="commitment_date"/>
+                <field name="x_weight_total_uom"/>
+
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb8">
+                                <div class="o_kanban_record_headings mt4">
+                                    <button style="padding: 0px 0px;" class="btn btn-link o_kanban_record_title" name="open_picking_client_action"
+                                        type="object">
+                                        <span><t t-esc="record.name.value"/></span>
+                                    </button>
+                                    <!-- <strong class="o_kanban_record_title"><span><t t-esc="record.name.value"/></span></strong> -->
+                                </div>
+                                <t t-if="record.x_partner_id_x_is_tss.raw_value == true">
+                                  <strong>TSS</strong>
+                                </t>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <strong>Client:</strong> <span t-esc="record.partner_id.value" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Delivery date:</strong> <span t-esc="record.commitment_date.value" />
+                                </div>
+                                <div class="col-6">
+                                    <strong>
+                                        <field name="x_inventory_state" widget="label_selection" options="{'classes': {'pick': 'primary', 'pack': 'secondary', 'out': 'success'}}"/>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pick'">Nro of picks:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'pack'">Nro of packs:</strong>
+                                    <strong t-if="record.x_inventory_state.raw_value == 'out'">Nro of out:</strong>
+                                    <span t-esc="record.x_picking_count.value" />
+                                </div>
+                                <div class="col-6">
+                                    <strong>Nro of items:</strong> <span t-esc="record.x_item_count.value" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Nro of units:</strong> <span t-esc="record.x_unit_total.value" />
+                                </div>
+                                <div class="col-6">
+                                    <strong>Weight total:</strong> <span t-esc="record.x_weight_total.value" /> <span t-esc="record.x_weight_total_uom.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="sale_order_action_kanban" model="ir.actions.act_window">
+        <field name="name">Sale Order</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="domain">[('state', 'in', [('done')])]</field>
+        <field name="view_id" ref="sale_order_kanban_custom"/>
+        <field name="context">{
+            'form_view_initial_mode': 'edit',
+            'force_detailed_view': True,
+        }</field>
+    </record>
+
+</odoo>

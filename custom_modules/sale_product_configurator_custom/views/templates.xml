@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+       <template id="assets_backend" name="Configure" inherit_id="sale_product_configurator.configure">
+            <xpath expr="//div/div/t/div/div[@class='css_quantity input-group']" position="after">
+                <table class="table table-striped table-sm" style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center td-qty">Cantidad minima</th>
+                            <th class="text-center td-price">Tarifa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="pricelist.item_ids" t-as="plist">
+                            <t t-if="plist.product_tmpl_id.id == product.id">
+                                <td class="text-center td-qty"><t t-esc="plist.min_quantity"/></td>
+                                <td class="text-center td-price"><t t-esc="plist.price"/></td>
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+            </xpath>
+        </template>
+    </data>
+</odoo>
