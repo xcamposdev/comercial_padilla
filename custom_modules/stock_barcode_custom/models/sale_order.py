@@ -23,7 +23,7 @@ class SaleOrderStockBacode(models.Model):
         ('pack', 'Pack'),
         ('out', 'Out'),
         ('done', 'Done')
-    ], string='Status', compute="_compute_number_picks")
+    ], string='Status', compute="_compute_number_picks", store=True)
 
     def _compute_get_partner_x_is_tss(self):
         for record in self:

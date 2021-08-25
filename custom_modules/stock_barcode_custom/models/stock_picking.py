@@ -588,9 +588,6 @@ class StockPicking(models.Model):
     def has_origin(self):
         return True if self.origin else False
 
-    # def button_validate(self):
-
-
 class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 

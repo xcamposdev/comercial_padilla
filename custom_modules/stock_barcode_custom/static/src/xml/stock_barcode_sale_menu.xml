@@ -1,0 +1,30 @@
+<templates xml:space="preserve">
+    <t t-name="sale_barcode_menu">
+        <div class="o_stock_barcode_main_menu_container o_home_menu_background">
+            <div class="o_stock_barcode_main_menu position-relative">
+                <a href="#" class="o_stock_barcode_menu d-block float-left"><i class="fa fa-chevron-left"></i></a>
+                <h1 class="mb-4">Pedido de Venta</h1>
+
+                <p>Seleccione el tipo de operacion a realizar:</p>
+                <hr class="mb-4 d-none d-sm-block"/>
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <button class="button_type_pick btn btn-block btn-primary mb-4">PICK</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button class="button_type_pack btn btn-block btn-primary mb-4">PACK</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button class="button_type_out button_sale btn btn-block btn-primary mb-4">OUT</button>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </t>
+</templates>
