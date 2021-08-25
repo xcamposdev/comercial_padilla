@@ -1,3 +1,9 @@
+.o_validation_message {
+    text-align: center;
+    font-size: x-large;
+    background-color: darkseagreen;
+    height: 41px;
+}
 .o_stock_barcode_main_menu_container {
     display: flex;
     flex-flow: column nowrap;
@@ -96,9 +102,18 @@
         top: 50%;
     }
 }
-.o_custom_content { 
+.o_custom_content {
     overflow-y: scroll;
+    max-height: 370px;
+    margin-bottom: 15px;
+//     border: 1px solid #757575;
+    padding: 4px;
+    border-radius: 4px;
+    min-height: 255px;
+}
+.o_custom_lines {
     max-height: 40%;
+    overflow-y: scroll !important;
 }
 .o_width_200 {
     width: 200px !important;
