@@ -194,8 +194,10 @@ class SaleOrderStockBacode(models.Model):
                             'El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
                                 sq.package_id.name, sq.product_id.name))
                     pack_qty = 1.0
+                    location_id = sq.location_id.id
                     if sq.package_id.id in packaging_ids and float(packaging_ids[sq.package_id.id]['qty']) != float(0):
                         pack_qty = packaging_ids[sq.package_id.id]['qty']
+                        location_id = packaging_ids[sq.package_id.id]['x_location'][0]
                     else:
                         _logger.info("\n\n El producto {} no tiene el tipo de paquete {} configurado \n\n".format(
                             sq.product_id.name, sq.package_id.name))
@@ -217,7 +219,7 @@ class SaleOrderStockBacode(models.Model):
                                 'product_id': (sq.product_id.id, sq.product_id.name),
                                 'uom_id': uom_id,
                                 'package_id': False,
-                                'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
+                                'location_id': location_id,
                                 'available_qty': available_qty - packs_requested,
                             })
                     elif available_qty > 0:
@@ -225,7 +227,7 @@ class SaleOrderStockBacode(models.Model):
                             'product_id': (sq.product_id.id, sq.product_id.name),
                             'uom_id': uom_id,
                             'package_id': False,
-                            'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
+                            'location_id': location_id,
                             'available_qty': available_qty,
                         })
                 elif available_qty > 0:
