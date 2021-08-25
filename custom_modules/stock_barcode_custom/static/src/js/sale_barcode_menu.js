@@ -14,13 +14,13 @@ var SaleMenu = AbstractAction.extend({
 
     events: {
         "click .button_type_pick": function(){
-            this.do_action('stock_barcode_custom.sale_order_action_kanban');
+            this.do_action('stock_barcode_custom.sale_order_action_kanban_pick');
         },
         "click .button_type_pack": function(){
-            this.do_action('stock_barcode_custom.sale_order_action_kanban');
+            this.do_action('stock_barcode_custom.sale_order_action_kanban_pack');
         },
         "click .button_type_out": function(){
-            this.do_action('stock_barcode_custom.sale_order_action_kanban');
+            this.do_action('stock_barcode_custom.sale_order_action_kanban_out');
         },
     },
 

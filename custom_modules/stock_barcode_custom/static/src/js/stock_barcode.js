@@ -3,7 +3,6 @@ odoo.define('stock_barcode_custom.MainMenu', function (require) {
 
 var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
-var QWeb = core.qweb;
 var Dialog = require('web.Dialog');
 var Session = require('web.session');
 
@@ -20,9 +19,7 @@ var MainMenu = AbstractAction.extend({
             this.open_inventory();
         },
         "click .button_sale": function(){
-            this.do_action('stock_barcode_custom.sale_order_action_kanban');
-        },
-        "click .button_sale_type": function(){
+//             this.do_action('stock_barcode_custom.sale_order_action_kanban');
             this.do_action('stock_barcode_custom.stock_barcode_action_sale_menu');
         },
         "click .o_stock_barcode_menu": function(){

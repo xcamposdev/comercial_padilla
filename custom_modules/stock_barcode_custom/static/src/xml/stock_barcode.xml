@@ -28,23 +28,20 @@
                 </ul>
 
                 <hr class="mb-4 d-none d-sm-block"/>
-                <div class="container">
-                    <div class="row">
-                        <div class="col">
-                            <button class="button_operations btn btn-block btn-primary mb-4 mb-sm-0">Operations</button>
-                        </div>
-                        <div class="col">
-                            <button class="button_inventory btn btn-block btn-primary">Inventory Adjustments</button>
-                        </div>
+
+                <div class="row">
+                    <div class="col">
+                        <button class="button_operations btn btn-block btn-primary mb-4 mb-sm-0">Operations</button>
                     </div>
-                    <div class="row">
-                        <div class="col">
-                            <!-- <button class="button_sale btn btn-block btn-primary">Prepare an sale order</button> -->
-                            <button class="button_sale_type btn btn-block btn-primary">Prepare an sale order</button>
-                        </div>
-                    </div>                
+                    <div class="col">
+                        <button class="button_inventory btn btn-block btn-primary">Inventory Adjustments</button>
+                    </div>
                 </div>
-                
+                <div class="row">
+                    <div class="col">
+                        <button class="button_sale btn btn-block btn-primary">Prepare an sale order</button>
+                    </div>
+                </div>
             </div>
         </div>
     </t>

@@ -149,9 +149,6 @@
         <field name="view_id" ref="product_view_list_barcodes"/>
     </record>
 
-
-    <!-- show list of sale ordes -->
-
     <record id="sale_order_kanban_custom" model="ir.ui.view">
         <field name="name">sale.order.kanban</field>
         <field name="model">sale.order</field>
@@ -231,28 +228,47 @@
         </field>
     </record>
 
-    <!--Inherit quotations search view-->
+<!--    <field name="context">{'search_default_filter_x_inventory_state_stored': True}</field>-->
     <record id="view_sale_order_inherit_search" model="ir.ui.view">
         <field name="name">sale.order.search.expand.filter</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
         <field name="arch" type="xml">
             <xpath expr="//search" position="inside">
-                <filter string="Estado de Inventario" name="x_inventory_state" domain="[('x_inventory_state', '=', 1)]"/>
+                <filter string="Estado de Inventario pick" name="x_inventory_state_pick" domain="[('x_inventory_state', '=', 'pick')]"/>
+                <filter string="Estado de Inventario pack" name="x_inventory_state_pack" domain="[('x_inventory_state', '=', 'pack')]"/>
+                <filter string="Estado de Inventario out" name="x_inventory_state_out" domain="[('x_inventory_state', '=', 'out')]"/>
             </xpath>
         </field>
     </record>
 
-    <record id="sale_order_action_kanban" model="ir.actions.act_window">
+    <record id="sale_order_action_kanban_pick" model="ir.actions.act_window">
         <field name="name">Sale Order</field>
         <field name="res_model">sale.order</field>
         <field name="view_mode">kanban,form</field>
-        <field name="domain">[('state', 'in', [('done')])]</field>
-        <field name="view_id" ref="sale_order_kanban_custom"/>
+        <field name="view_id" ref="stock_barcode_custom.sale_order_kanban_custom"/>
         <field name="context">{
-            'form_view_initial_mode': 'edit',
-            'force_detailed_view': True,
-            'search_default_filter_x_inventory_state': 1,
+            'search_default_x_inventory_state_pick': 1
+        }</field>
+    </record>
+
+    <record id="sale_order_action_kanban_pack" model="ir.actions.act_window">
+        <field name="name">Sale Order</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="view_id" ref="stock_barcode_custom.sale_order_kanban_custom"/>
+        <field name="context">{
+            'search_default_x_inventory_state_pack': 1
+        }</field>
+    </record>
+
+    <record id="sale_order_action_kanban_out" model="ir.actions.act_window">
+        <field name="name">Sale Order</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="view_id" ref="stock_barcode_custom.sale_order_kanban_custom"/>
+        <field name="context">{
+            'search_default_x_inventory_state_out': 1
         }</field>
     </record>
 

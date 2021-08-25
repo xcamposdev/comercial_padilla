@@ -190,7 +190,7 @@ var PickingClientAction = ClientAction.extend({
                         if (self.picking_ids == undefined) {
                             console.log('entro do_action sam');
                             self._endBarcodeFlow();
-                            self.do_action('stock_barcode_custom.sale_order_action_kanban');
+                            self.do_action('stock_barcode_custom.stock_barcode_action_sale_menu');
                         } else if (self.picking_ids.length > 0) {
                             console.log('entro nex page sam');
                             self.trigger_up('next_page');
@@ -198,17 +198,6 @@ var PickingClientAction = ClientAction.extend({
                             console.log('entro exit sam');
                             self.trigger_up('exit');
                         }
-//                        self._getState(self.actionParams.pickingId).then(function(res){
-//                            console.log('successCallback 1');
-//                            console.log(res);
-//                            if (res[0].picking_ids != undefined && res[0].picking_ids.length > 0 && res[0].picking_ids.indexOf(self.actionParams.pickingId)) {
-//                                console.log('Entro Next sam');
-//                                self.trigger_up('next_page');
-//                            } else {
-//                                console.log('Entro exit sam');
-//                                self.trigger_up('exit');
-//                            }
-//                        });
                     };
                     var exitCallback = function (infos) {
                         if ((infos === undefined || !infos.special) && this.dialog.$modal.is(':visible')) {
