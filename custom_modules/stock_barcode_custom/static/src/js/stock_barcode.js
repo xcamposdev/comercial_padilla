@@ -19,7 +19,8 @@ var MainMenu = AbstractAction.extend({
             this.open_inventory();
         },
         "click .button_sale": function(){
-            this.do_action('stock_barcode_custom.sale_order_action_kanban');
+//             this.do_action('stock_barcode_custom.sale_order_action_kanban');
+            this.do_action('stock_barcode_custom.stock_barcode_action_sale_menu');
         },
         "click .o_stock_barcode_menu": function(){
             this.trigger_up('toggle_fullscreen');

@@ -290,22 +290,13 @@ var LinesWidget = Widget.extend({
             $body.prepend($lines);
             $lines.on('click', '.o_edit', this._onClickEditLine.bind(this));
             $lines.on('click', '.o_package_content', this._onClickTruckLine.bind(this));
+        } else {
+            console.log('linesWidget _renderLines else');
         }
         // Toggle and/or enable the control buttons. At first, they're all displayed and enabled.
         var $next = this.$('.o_next_page');
         var $previous = this.$('.o_previous_page');
         var $validate = this.$('.o_validate_page');
-//        if (this.nbPages === 1) {
-//            $next.prop('disabled', true);
-//            $previous.prop('disabled', true);
-//        }
-        if (this.pageIndex + 1 === this.nbPages) {
-            //$next.toggleClass('o_hidden');
-//            $next.prop('disabled', true);
-        } else {
-//            $validate.toggleClass('o_hidden');
-        }
-
         this._handleControlButtons();
 
         if (this.mode === 'receipt') {

@@ -6,9 +6,52 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+INVENTORY_STATES = [
+    ('pick', 'Pick'),
+    ('pack', 'Pack'),
+    ('out', 'Out'),
+    ('done', 'Done')
+]
+
+
+def _filter_sales_order(sales):
+    for order in sales:
+        if order.warehouse_id:
+            order.x_picking_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id)))
+            order.x_pack_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id)))
+            order.x_out_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.out_type_id, order.warehouse_id.int_type_id)))
+
+            pick_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                 'done', 'cancel')))
+            pack_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                 'done', 'cancel')))
+            out_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
+                order.warehouse_id.out_type_id, order.warehouse_id.int_type_id) and data.state in (
+                                'done', 'cancel')))
+            if pick_done < order.x_picking_count:
+                order.x_inventory_state = 'pick'
+            elif pack_done < order.x_pack_count:
+                order.x_inventory_state = 'pack'
+            elif out_done < order.x_out_count:
+                order.x_inventory_state = 'out'
+            else:
+                order.x_inventory_state = 'done'
+    return sales
+
 
 class SaleOrderStockBacode(models.Model):
     _inherit = "sale.order"
+
+    def pro_search(self, operator, value):
+        sales = self.search([])
+        sale = _filter_sales_order(sales)
+        sale_ids = sale.filtered(lambda s: s.x_inventory_state == value)
+        return [('id', 'in', sale_ids.ids)]
 
     x_partner_id_x_is_tss = fields.Boolean(string='¿Es TSS?', compute="_compute_get_partner_x_is_tss")
     x_picking_count = fields.Integer(string='Nro of picks', compute='_compute_number_picks')
@@ -18,12 +61,7 @@ class SaleOrderStockBacode(models.Model):
     x_unit_total = fields.Integer(string='Nro of units', compute='_compute_number_units')
     x_weight_total = fields.Float(string="Weight total", compute="_compute_weight_total")
     x_weight_total_uom = fields.Char(string="Weight Uom", compute="_compute_weight_total_uom")
-    x_inventory_state = fields.Selection(selection=[
-        ('pick', 'Pick'),
-        ('pack', 'Pack'),
-        ('out', 'Out'),
-        ('done', 'Done')
-    ], string='Status', compute="_compute_number_picks")
+    x_inventory_state = fields.Selection(INVENTORY_STATES, string='Status sale pda', compute="_compute_number_picks", search=pro_search)
 
     def _compute_get_partner_x_is_tss(self):
         for record in self:
@@ -31,32 +69,7 @@ class SaleOrderStockBacode(models.Model):
 
     @api.depends('picking_ids')
     def _compute_number_picks(self):
-        for order in self:
-            if order.warehouse_id:
-                order.x_picking_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id)))
-                order.x_pack_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id)))
-                order.x_out_count = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.out_type_id, order.warehouse_id.int_type_id)))
-
-                pick_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.pick_type_id, order.warehouse_id.int_type_id) and data.state in (
-                                     'done', 'cancel')))
-                pack_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.pack_type_id, order.warehouse_id.int_type_id) and data.state in (
-                                     'done', 'cancel')))
-                out_done = len(list(data for data in order.picking_ids if data.picking_type_id in (
-                    order.warehouse_id.out_type_id, order.warehouse_id.int_type_id) and data.state in (
-                                    'done', 'cancel')))
-                if pick_done < order.x_picking_count:
-                    order.x_inventory_state = 'pick'
-                elif pack_done < order.x_pack_count:
-                    order.x_inventory_state = 'pack'
-                elif out_done < order.x_out_count:
-                    order.x_inventory_state = 'out'
-                else:
-                    order.x_inventory_state = 'done'
+        _filter_sales_order(self)
 
     def _compute_number_items(self):
         for order in self:
@@ -194,8 +207,10 @@ class SaleOrderStockBacode(models.Model):
                             'El empaquetado "%s" no tiene asignado una ubicación para el producto "%s"' % (
                                 sq.package_id.name, sq.product_id.name))
                     pack_qty = 1.0
+                    location_id = sq.location_id.id
                     if sq.package_id.id in packaging_ids and float(packaging_ids[sq.package_id.id]['qty']) != float(0):
                         pack_qty = packaging_ids[sq.package_id.id]['qty']
+                        location_id = packaging_ids[sq.package_id.id]['x_location'][0]
                     else:
                         _logger.info("\n\n El producto {} no tiene el tipo de paquete {} configurado \n\n".format(
                             sq.product_id.name, sq.package_id.name))
@@ -217,7 +232,7 @@ class SaleOrderStockBacode(models.Model):
                                 'product_id': (sq.product_id.id, sq.product_id.name),
                                 'uom_id': uom_id,
                                 'package_id': False,
-                                'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
+                                'location_id': location_id,
                                 'available_qty': available_qty - packs_requested,
                             })
                     elif available_qty > 0:
@@ -225,7 +240,7 @@ class SaleOrderStockBacode(models.Model):
                             'product_id': (sq.product_id.id, sq.product_id.name),
                             'uom_id': uom_id,
                             'package_id': False,
-                            'location_id': packaging_ids[sq.package_id.id]['x_location'][0],
+                            'location_id': location_id,
                             'available_qty': available_qty,
                         })
                 elif available_qty > 0:

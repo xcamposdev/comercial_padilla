@@ -8,7 +8,7 @@ This module enables the barcode scanning feature for the warehouse management sy
     """,
     'category': 'Operations/Inventory',
     'version': '13.0.1.1',
-    'depends': ['base', 'web', 'barcodes', 'stock', 'web_tour', 'sale', 'delivery', 'padilla_tss_partner_custom'],
+    'depends': ['base', 'account', 'web', 'barcodes', 'stock', 'web_tour', 'sale', 'delivery', 'padilla_tss_partner_custom'],
     'data': [
         'views/stock_inventory_views.xml',
         'views/stock_picking_views.xml',
@@ -33,6 +33,7 @@ This module enables the barcode scanning feature for the warehouse management sy
     ],
     'qweb': [
         "static/src/xml/stock_barcode.xml",
+        "static/src/xml/stock_barcode_sale_menu.xml",        
         "static/src/xml/qweb_templates.xml",
         "static/src/xml/qweb_templates_custom.xml",
     ],

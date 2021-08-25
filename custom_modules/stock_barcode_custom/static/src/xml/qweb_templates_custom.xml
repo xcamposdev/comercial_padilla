@@ -27,7 +27,7 @@
     <t t-name="stock_barcode_lines_widget_custom">
         <div class="o_barcode_lines_picking o_custom_content">
         </div>
-        <div class="o_barcode_lines list-group flex-grow-1 d-block bg-100 position-relative"></div>
+        <div class="o_barcode_lines list-group flex-grow-1 d-block bg-100 position-relative o_custom_lines"></div>
 
         <div t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="o_barcode_control d-flex">
             <button t-if="widget.groups.group_tracking_lot and widget.model == 'stock.picking' and widget.state == 'pack'" class="btn btn-secondary text-uppercase o_put_in_pack"><i class="fa fa-cube mr-1"/> Put In Pack</button>
@@ -96,8 +96,13 @@
                         </t>
                     </div>
                 </div>
-                <div class='float-ball'><span class="o_lines_completed" t-esc="suggestion_index"></span>/<span t-esc="count_lines"/></div>
             </t>
+            <t t-if="!show_pickings">
+                <div class="o_validation_message">
+                    Esta listo para validar!
+                </div>
+            </t>
+            <div class='float-ball'><span class="o_lines_completed" t-esc="suggestion_index"></span>/<span t-esc="count_lines"/></div>
         </div>
 
     </t>

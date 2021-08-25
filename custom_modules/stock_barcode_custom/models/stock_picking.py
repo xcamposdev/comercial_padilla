@@ -588,8 +588,10 @@ class StockPicking(models.Model):
     def has_origin(self):
         return True if self.origin else False
 
-class StockPickingType(models.Model):
+    # def button_validate(self):
 
+
+class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 
     def get_action_picking_tree_ready_kanban(self):
