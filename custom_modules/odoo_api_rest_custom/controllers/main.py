@@ -72,14 +72,14 @@ class ApiAccess(Controller):
                     step = params.get('step')
                     limit = params.get('limit')
 
-                product_pl_items = request.env['product.pricelist.item']
-                product_pl_items = product_pl_items.sudo().search([('x_studio_presupuestar_a.id', '=', int(user_id))])
+                user = request.env['res.partner'].sudo().search([('id', '=', int(user_id))])
+                product_pricelist = user.parent_id.property_product_pricelist if user.parent_id else user.property_product_pricelist
                 location_code = request.env['ir.config_parameter'].sudo().get_param('odoo_api_rest_custom'
                                                                                  '.x_location_code') or False
                 if not location_code:
                     location_code = 'CIN'
 
-                for prods in product_pl_items:
+                for prods in product_pricelist.item_ids:
                     sellers = {}
                     price = 0.0
 
