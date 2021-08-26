@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <template id="report_package_sale_order">
+    <t t-call="web.html_container">
+      <t t-call="web.basic_layout">
+        <div class="page">
+            <style>
+              .logo_content { width:120px; }
+              .logo { width:90px; height:60px; display:inline-block; }
+              .border_custom { border:1px solid #666666; padding:10px; }
+              .margin_left_30 { margin-left:30px; }
+              .margin_right_30 { margin-right:30px; }
+              .small { font-size:14px !important; }
+            </style>
+        
+            <t t-set="nro_page" t-value="1"/>
+            <t t-set="packages" t-value="docs.get_packaging_report_packaging()"/>
+            <t t-foreach="packages" t-as="o">
+
+                <div class="row">
+                  <div class="col-2 logo_content">
+                    <img t-if="o['company_id']" t-att-src="'/web/content/res.company/%s/logo' % (o['company_id'])" class="logo"/>
+                  </div>
+                  <div class="col-7">
+                    <p class="m-0" t-esc="o['company_name']"/>
+                    <p class="m-0" t-esc="o['company_vat']"/>
+                  </div>
+                  <div class="col-3 text-right">
+                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                  </div>
+                </div>
+                
+                <div class="row mt8 small">
+                  <div class="col-6">
+                    <t t-if="is_tss">
+                      <span>The Smoker Shop</span>
+                    </t>
+                    <t t-else="">
+                      <span>Comercial Padilla</span>
+                    </t>
+                    <p class="m-0" t-esc="o['company']" t-options="{'widget': 'contact', 'fields': ['address'], 'no_marker': True}"/>
+                  </div>
+                  <div class="col-6">
+                    <!-- <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address', 'phone'], 'no_marker': True, 'phone_icons': True}"/> -->
+                    <p class="m-0" t-esc="o['partner']" t-options="{'widget': 'contact', 'fields': ['address','name'], 'no_marker': True}"/>
+                  </div>
+                </div>
+
+                <div class="row mt16 small">
+                  <div class="col-12">
+                    <strong>Método:</strong>
+                    <span t-esc="o['carrier_name']"/>
+                  </div>
+                </div>
+                <div class="row small">
+                  <div class="col-12">
+                    <strong>Peso:</strong>
+                    <span t-esc="o['weight']"/> <span t-esc="o['weight_uom_name']" />
+                  </div>
+                </div>
+                <div class="row mt16">
+                  <div class="col-6">
+                    <span class="border_custom text-center" >
+                      <t t-esc="nro_page"/> / <t t-esc="len(packages)"/>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="row mt32">
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['package_name'], 160, 70)" />
+                  </div>
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['sale_name'], 160, 70)" />
+                  </div>
+                  <div class="col-4">
+                    <img class="barcode border_custom" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o['picking_name'], 160, 70)" />
+                  </div>
+                </div>
+
+                <p style="page-break-before:always;"> </p>
+                <t t-set="nro_page" t-value="nro_page+1"/>
+            </t>
+        </div>
+      </t>
+    </t>
+  </template>
+
+</odoo>

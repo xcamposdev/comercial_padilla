@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <report id="action_report_package_sale_order" 
+            string="Imprimir bultos" 
+            model="stock.picking" 
+            report_type="qweb-pdf" 
+            name="package_barcode_so_custom.report_package_sale_order" 
+            file="package_barcode_so_custom.report_package_sale_order"
+            print_report_name="'Bultos'"
+            paperformat="package_barcode_so_custom.paperformat_bulto"
+            />
+            
+</odoo>

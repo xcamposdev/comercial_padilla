@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_registration_order">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div class="row">
+                        <div t-if="o.origin" class="col-12">
+                            <h5>Documento Origen: <span t-field="o.origin"/></h5>
+                        </div>
+                    </div>
+                    <div class="row" style="border: 1px solid black; border-top: none;">
+                        <div t-if="o.origin" class="text-center">
+                            <img class="barcode" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o.origin, 800, 700)" alt="Barcode"></img>&amp;nbsp;
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+     <template id="report_picking_barcode_custom" inherit_id="stock.report_picking">
+        <xpath expr="//div[@class='page']/div[2]" position="after">
+            <div t-if="o.origin" class="row justify-content-end mb16">
+                <div class="col-4" name="right_box_barcode">
+                    <img class="barcode" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=1' % ('Code128', o.origin, 400, 67)" style="width:300px;height:50px;" alt="Barcode"></img>&amp;nbsp;
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <report id="action_report_registration_order" model="stock.picking" report_type="qweb-pdf" name="stock_barcode_custom.report_registration_order" string="Matrícula pedido" file="stock_barcode_custom.report_registration_order" paperformat="stock_barcode_custom.paperformat_ticket_10x10"/>
+</odoo>
