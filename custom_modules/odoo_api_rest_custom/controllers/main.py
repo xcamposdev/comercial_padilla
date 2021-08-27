@@ -87,14 +87,14 @@ class ApiAccess(Controller):
                     location_code = 'CIN'
 
                 for prods in product_pricelist.item_ids:
-                    sellers = {}
+                    sellers = set()
                     price = 0.0
 
                     if prods.fixed_price:
                         price = prods.fixed_price
 
                     for s in prods.product_tmpl_id.seller_ids:
-                        sellers.append(s.name.name)
+                        sellers.add(s.name.name)
 
                     for p in prods.product_tmpl_id.product_variant_ids:
                         stock_qty = request.env['stock.quant'].sudo().search([
