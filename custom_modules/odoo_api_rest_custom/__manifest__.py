@@ -7,7 +7,7 @@
     "description": "API Rest para consulta en Odoo.",
     "author": "Develoop Software",
     "website": "https://www.develoop.net",
-    'depends': ['base', 'stock', 'sale'],
+    'depends': ['base', 'stock', 'sale', 'product'],
     'data': [
         'security/ir.model.access.csv',
         'views/apirest_store_details.xml',

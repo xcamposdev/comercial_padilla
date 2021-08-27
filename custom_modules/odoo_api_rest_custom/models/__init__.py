@@ -1,2 +1,3 @@
 # License AGPL-3 - See https://www.gnu.org/licenses/agpl-3.0.html
 from . import apirest_store_details
+from . import res_partner

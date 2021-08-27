@@ -1,9 +1,12 @@
+import logging
 import json
 import functools
 from datetime import datetime
 from odoo.http import request, Response, Controller, route, JsonRequest
 from odoo.addons.web.controllers.main import _serialize_exception
 from odoo.tools import date_utils
+
+_logger = logging.getLogger(__name__)
 
 
 def validate_token(f):
@@ -73,7 +76,11 @@ class ApiAccess(Controller):
                     limit = params.get('limit')
 
                 user = request.env['res.partner'].sudo().search([('id', '=', int(user_id))])
-                product_pricelist = user.parent_id.property_product_pricelist if user.parent_id else user.property_product_pricelist
+                product_pricelist = request.env['product.pricelist'].sudo().search([], order='sequence asc', limit=1)
+                try:
+                    product_pricelist = user.parent_id.property_product_pricelist if user.parent_id else user.property_product_pricelist
+                except Exception as ex:
+                    _logger.info('The user {} have not defined a product pricelist'.format(user))
                 location_code = request.env['ir.config_parameter'].sudo().get_param('odoo_api_rest_custom'
                                                                                  '.x_location_code') or False
                 if not location_code:
